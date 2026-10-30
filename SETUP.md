@@ -1,17 +1,11 @@
-# OrbitCare — Phase 1 (Foundation + first complete journey)
+# OrbitCare — Phases 1–3 (foundation, evidence, and team contract)
 
 Login → daily check-in → dashboard, with manual heart-rate readings, three seeded fictional astronauts and 14 days of **synthetic** data.
 
 ## Install (Laravel 12, PHP 8.2+, MySQL, Node 18+)
 
-```bash
-composer create-project laravel/laravel orbitcare
-cd orbitcare
-```
-
-1. Extract this zip into the `orbitcare` folder and **allow overwriting** (replaces `routes/web.php`, `vite.config.js`, `app/Models/User.php`, `AppServiceProvider.php`, `DatabaseSeeder.php`).
-2. Create an empty MySQL database called `orbitcare`.
-3. Edit `.env`:
+1. Clone the repository, then create an empty MySQL database called `orbitcare`.
+2. Copy `.env.example` to `.env`, then edit the database values if your local MySQL credentials differ:
    ```
    APP_NAME=OrbitCare
    APP_ENV=local
@@ -22,13 +16,15 @@ cd orbitcare
    DB_USERNAME=root
    DB_PASSWORD=
    ```
-4. Install bundled front-end packages and build:
+3. Install dependencies and build the local frontend:
    ```bash
-   npm install bootstrap bootstrap-icons chart.js @fontsource-variable/inter
+   composer install
+   npm install
    npm run build        # or: npm run dev
    ```
-5. Migrate and seed, then run:
+4. Generate the app key, migrate and seed, then run:
    ```bash
+   php artisan key:generate
    php artisan migrate:fresh --seed
    php artisan serve
    ```
@@ -49,6 +45,11 @@ Run tests: `php artisan test` (needs the PHP sqlite extension, or point phpunit.
 - Source labels (Simulation / Manual) and "stale / no data" states instead of looking healthy
 - All assets bundled locally (no CDN) so it works offline
 - Astronauts only ever query their own crew profile — no record IDs in URLs
+
+## Phases 2 and 3
+
+- [Research register and data provenance](docs/research-register.md) document NASA context, synthetic-data boundaries, and experimental assumptions.
+- [Team working agreement](docs/team-working-agreement.md) defines setup, branch workflow, routes, statuses, metric codes, units, and shared-file ownership.
 
 ## Not yet built (next phases)
 Alert rules + engine, alert detail/follow-ups, medical-officer crew overview, admin/assignments, CSV import, reports, research page, scenario reset tooling.

@@ -1,3 +1,18 @@
+# OrbitCare
+
+OrbitCare is a Laravel + MySQL prototype for recording astronaut health indicators, reviewing trends, and supporting clearly labelled experimental follow-up workflows. It is not a diagnostic or clinical decision tool.
+
+## Project documentation
+
+- [Installation and local demo](SETUP.md)
+- [Development roadmap](phases.md)
+- [Phase 2 research register and data provenance](docs/research-register.md)
+- [Phase 3 team working agreement and interface contract](docs/team-working-agreement.md)
+
+The included demonstration records are synthetic. NASA sources provide context for selected indicators; they do not validate alert thresholds, individual interpretations, or diagnoses.
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
