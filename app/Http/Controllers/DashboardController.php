@@ -37,7 +37,7 @@ class DashboardController extends Controller
 
         $alerts = $crew->alerts()
             ->with('rule')
-            ->whereIn('status', ['open', 'review'])
+            ->whereIn('status', ['open', 'acknowledged', 'under_review'])
             ->orderByDesc('last_evaluated_at')
             ->get();
 

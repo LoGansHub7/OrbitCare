@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +32,12 @@ class User extends Authenticatable
     public function crewProfile(): HasOne
     {
         return $this->hasOne(CrewProfile::class);
+    }
+
+    public function assignedCrewProfiles(): BelongsToMany
+    {
+        return $this->belongsToMany(CrewProfile::class, 'care_assignments', 'medical_officer_id', 'crew_profile_id')
+            ->withTimestamps();
     }
 
     public function isAstronaut(): bool

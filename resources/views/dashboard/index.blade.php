@@ -35,21 +35,22 @@
                     @php
                         $badgeClass = $alert->severity === 'priority_review' ? 'oc-badge-priority-review' : 'oc-badge-review';
                     @endphp
-                    <div class="border rounded-3 p-3 mb-2">
+                    <a href="{{ route('alerts.show', $alert) }}" class="oc-alert-link border rounded-3 p-3 mb-2 d-block text-decoration-none text-reset">
                         <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
                             <span class="oc-badge {{ $badgeClass }}">
                                 <i class="bi {{ $alert->severity === 'priority_review' ? 'bi-exclamation-triangle-fill' : 'bi-eye' }}" aria-hidden="true"></i>
                                 {{ $alert->severity === 'priority_review' ? 'Priority review' : 'Review' }}
                             </span>
-                            <small class="text-secondary">{{ $alert->last_evaluated_at?->format('M j') }}</small>
+                            <small class="text-secondary text-capitalize">{{ str_replace('_', ' ', $alert->status) }}</small>
                         </div>
                         <div class="fw-semibold mb-1">{{ $alert->summary }}</div>
-                        <div class="small text-secondary">{{ $alert->rule?->code ?? 'experimental_rule' }}</div>
-                    </div>
+                        <div class="small text-secondary">{{ $alert->rule?->code ?? 'experimental_rule' }} · {{ $alert->last_evaluated_at?->format('M j') }}</div>
+                    </a>
                 @empty
                     <p class="mb-2"><span class="oc-badge oc-badge-ok"><i class="bi bi-check-circle" aria-hidden="true"></i> No flag</span></p>
                     <p class="small text-secondary mb-0">“No flag” only means no implemented rule triggered. It is never a medical clearance statement.</p>
                 @endforelse
+                <a href="{{ route('alerts.index') }}" class="btn btn-outline-secondary btn-sm mt-2">View alert history</a>
             </div>
         </div>
     </div>

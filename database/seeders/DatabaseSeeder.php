@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             MetricDefinitionSeeder::class,
             AlertRuleSeeder::class,
             DemoSeeder::class,
+            DemoCareAssignmentSeeder::class,
         ]);
     }
 }

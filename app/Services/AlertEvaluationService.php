@@ -38,7 +38,7 @@ class AlertEvaluationService
 
             if ($existing) {
                 $existing->update([
-                    'status' => $result['status'],
+                    'status' => $existing->status,
                     'severity' => $result['severity'],
                     'summary' => $result['summary'],
                     'explanation' => $result['explanation'],

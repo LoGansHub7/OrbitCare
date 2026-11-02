@@ -70,9 +70,19 @@ Do not duplicate daily check-in values into `health_readings`. Plausibility boun
 | GET | `/dashboard` | `dashboard` | Astronaut only | Dashboard |
 | GET/POST | `/check-in` | `checkin.create` / `checkin.store` | Astronaut only | Daily check-in |
 | GET/POST | `/readings` | `readings.index` / `readings.store` | Astronaut only | Readings |
+| GET | `/alerts` | `alerts.index` | Astronaut only; own crew profile | Alert history |
+| GET/POST | `/alerts/{alertId}` | `alerts.show` / `alerts.update` | Astronaut only; own alert | Alert review |
 | GET | `/staff` | `staff.home` | Medical officer or administrator | Staff area |
+| GET | `/staff/crew/{crewProfileId}` | `staff.crew.show` | Medical officer; assigned crew only | Crew review |
+| GET | `/reports` | `reports.self` | Astronaut; own crew profile | Personal report |
+| GET | `/staff/crew/{crewProfileId}/report` | `reports.assigned` | Medical officer; assigned crew only | Crew report |
+| GET | `/exports/my-health-data.csv` | `exports.self` | Astronaut; own records | Personal export |
+| GET | `/staff/crew/{crewProfileId}/health-data.csv` | `exports.assigned` | Medical officer; assigned crew only | Crew export |
+| GET | `/research` | `research.index` | Authenticated | Research and limits |
 
 Future routes must have a named route, server-side authorisation, validation, and an owner/module entry here before frontend links are merged. Health-record queries must be scoped to the authenticated user or an explicitly authorised assignment; IDs in a URL never confer access.
+
+Alert follow-up uses the sequence `open` → `acknowledged` → `under_review` → `closed`. Closing requires a note; each transition is retained in the follow-up timeline and audit log. Medical officers can review assigned crew only. Administrator access does not automatically grant health-record access.
 
 ## Shared-file ownership and review
 
