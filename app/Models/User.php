@@ -37,4 +37,19 @@ class User extends Authenticatable
     {
         return $this->role === self::ROLE_ASTRONAUT;
     }
+
+    public function isMedicalOfficer(): bool
+    {
+        return $this->role === self::ROLE_MEDICAL_OFFICER;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->isMedicalOfficer() || $this->isAdmin();
+    }
 }

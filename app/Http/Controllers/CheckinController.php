@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditEvent;
 use App\Models\DailyCheckin;
+use App\Services\AlertEvaluationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,10 @@ class CheckinController extends Controller
             'fatigue_rating' => ['required', 'integer', 'between:1,5'],
             'exercise_minutes' => ['required', 'integer', 'between:0,600'],
             'symptom_notes' => ['nullable', 'string', 'max:1000'],
+            'source' => ['sometimes', 'string', 'in:manual,csv_import,simulation'],
         ]);
+
+        $data['source'] = $data['source'] ?? 'manual';
 
         $date = today()->toDateString();
 
@@ -55,6 +59,8 @@ class CheckinController extends Controller
 
             return false;
         });
+
+        app(AlertEvaluationService::class)->evaluateCrew($crew);
 
         return redirect()->route('dashboard')->with('status', $corrected ? 'Today’s check-in was updated.' : 'Check-in saved.');
     }

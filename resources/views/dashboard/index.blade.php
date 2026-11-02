@@ -31,8 +31,25 @@
         <div class="col-12 col-xl-4">
             <div class="oc-card h-100">
                 <div class="oc-card-title">Alerts</div>
-                <p class="mb-2"><span class="oc-badge oc-badge-unknown"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Alert engine not active yet</span></p>
-                <p class="small text-secondary mb-0">Explainable alert rules arrive in Phase 2. When they do, “no flag” will only mean that no implemented rule triggered — never that you are medically healthy.</p>
+                @forelse ($alerts as $alert)
+                    @php
+                        $badgeClass = $alert->severity === 'priority_review' ? 'oc-badge-priority-review' : 'oc-badge-review';
+                    @endphp
+                    <div class="border rounded-3 p-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                            <span class="oc-badge {{ $badgeClass }}">
+                                <i class="bi {{ $alert->severity === 'priority_review' ? 'bi-exclamation-triangle-fill' : 'bi-eye' }}" aria-hidden="true"></i>
+                                {{ $alert->severity === 'priority_review' ? 'Priority review' : 'Review' }}
+                            </span>
+                            <small class="text-secondary">{{ $alert->last_evaluated_at?->format('M j') }}</small>
+                        </div>
+                        <div class="fw-semibold mb-1">{{ $alert->summary }}</div>
+                        <div class="small text-secondary">{{ $alert->rule?->code ?? 'experimental_rule' }}</div>
+                    </div>
+                @empty
+                    <p class="mb-2"><span class="oc-badge oc-badge-ok"><i class="bi bi-check-circle" aria-hidden="true"></i> No flag</span></p>
+                    <p class="small text-secondary mb-0">“No flag” only means no implemented rule triggered. It is never a medical clearance statement.</p>
+                @endforelse
             </div>
         </div>
     </div>

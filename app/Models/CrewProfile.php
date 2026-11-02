@@ -30,6 +30,16 @@ class CrewProfile extends Model
         return $this->hasMany(HealthReading::class);
     }
 
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    public function baselineProfiles(): HasMany
+    {
+        return $this->hasMany(BaselineProfile::class);
+    }
+
     public function missionDay(): int
     {
         return (int) $this->mission->starts_on->copy()->startOfDay()->diffInDays(today()) + 1;

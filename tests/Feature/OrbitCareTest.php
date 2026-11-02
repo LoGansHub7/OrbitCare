@@ -3,10 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\CrewProfile;
+use App\Models\DailyCheckin;
 use App\Models\HealthReading;
 use App\Models\MetricDefinition;
 use App\Models\Mission;
 use App\Models\User;
+use App\Services\AlertEvaluationService;
+use Database\Seeders\AlertRuleSeeder;
 use Database\Seeders\MetricDefinitionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -20,6 +23,7 @@ class OrbitCareTest extends TestCase
         parent::setUp();
         $this->withoutVite();
         $this->seed(MetricDefinitionSeeder::class);
+        $this->seed(AlertRuleSeeder::class);
     }
 
     private function astronaut(string $code = 'OC-T1'): User
@@ -89,5 +93,29 @@ class OrbitCareTest extends TestCase
         ]);
 
         $this->actingAs($me)->get('/readings')->assertOk()->assertDontSee('77.7');
+    }
+
+    public function test_alert_engine_creates_review_alert_for_declining_sleep_and_fatigue(): void
+    {
+        $user = $this->astronaut();
+        $crew = $user->crewProfile()->firstOrFail();
+
+        foreach ([2, 1, 0] as $offset) {
+            DailyCheckin::create([
+                'crew_profile_id' => $crew->id,
+                'mission_date' => today()->subDays($offset)->toDateString(),
+                'sleep_hours' => 5.5,
+                'sleep_quality' => 3,
+                'fatigue_rating' => 4,
+                'exercise_minutes' => 20,
+                'source' => 'manual',
+                'submitted_at' => now()->subDays($offset),
+            ]);
+        }
+
+        app(AlertEvaluationService::class)->evaluateCrew($crew);
+
+        $this->assertDatabaseHas('alerts', ['crew_profile_id' => $crew->id, 'status' => 'open']);
+        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('Review');
     }
 }

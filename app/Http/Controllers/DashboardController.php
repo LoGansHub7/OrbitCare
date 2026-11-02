@@ -35,6 +35,12 @@ class DashboardController extends Controller
                 $latestCheckin?->submitted_at, $latestCheckin?->source),
         ];
 
+        $alerts = $crew->alerts()
+            ->with('rule')
+            ->whereIn('status', ['open', 'review'])
+            ->orderByDesc('last_evaluated_at')
+            ->get();
+
         $days = collect(range($range - 1, 0))->map(fn ($n) => today()->subDays($n));
         $from = $days->first();
 
@@ -79,6 +85,7 @@ class DashboardController extends Controller
             'rows' => $rows,
             'latestCheckin' => $latestCheckin,
             'checkedInToday' => $checkins->has(today()->toDateString()),
+            'alerts' => $alerts,
         ]);
     }
 

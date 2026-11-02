@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\BaselineProfile;
 use App\Models\CrewProfile;
 use App\Models\DailyCheckin;
 use App\Models\HealthReading;
 use App\Models\MetricDefinition;
 use App\Models\Mission;
 use App\Models\User;
+use App\Services\AlertEvaluationService;
 use Illuminate\Database\Seeder;
 
 /**
@@ -40,6 +42,8 @@ class DemoSeeder extends Seeder
         ];
 
         $hrId = MetricDefinition::where('code', 'resting_heart_rate')->value('id');
+        $sleepId = MetricDefinition::where('code', 'sleep_duration')->value('id');
+        $fatigueId = MetricDefinition::where('code', 'fatigue_rating')->value('id');
 
         foreach ($crew as [$code, $name, $email, $scenario, $lastDaysAgo]) {
             $user = User::updateOrCreate(['email' => $email], [
@@ -49,6 +53,31 @@ class DemoSeeder extends Seeder
 
             HealthReading::where('crew_profile_id', $profile->id)->delete();
             DailyCheckin::where('crew_profile_id', $profile->id)->delete();
+
+            $baselineMap = [
+                'stable' => ['sleep_duration' => 7.2, 'fatigue_rating' => 2.0, 'resting_heart_rate' => 58.0],
+                'declining' => ['sleep_duration' => 7.5, 'fatigue_rating' => 2.3, 'resting_heart_rate' => 61.0],
+                'stale' => ['sleep_duration' => 7.0, 'fatigue_rating' => 2.4, 'resting_heart_rate' => 60.0],
+            ];
+
+            foreach ($baselineMap[$scenario] as $metricCode => $value) {
+                $metric = MetricDefinition::where('code', $metricCode)->first();
+
+                if (! $metric) {
+                    continue;
+                }
+
+                BaselineProfile::updateOrCreate(
+                    ['crew_profile_id' => $profile->id, 'metric_definition_id' => $metric->id],
+                    [
+                        'baseline_value' => $value,
+                        'method' => 'seeded',
+                        'reference_period_start' => today()->subDays(30),
+                        'reference_period_end' => today(),
+                        'min_sample_count' => 3,
+                    ]
+                );
+            }
 
             for ($i = 0; $i < 14; $i++) { // oldest -> newest
                 $date = today()->subDays($lastDaysAgo + (13 - $i));
@@ -91,6 +120,8 @@ class DemoSeeder extends Seeder
                     'submitted_at' => $date->copy()->setTime(8, 0),
                 ]);
             }
+
+            app(AlertEvaluationService::class)->evaluateCrew($profile);
         }
     }
 }
