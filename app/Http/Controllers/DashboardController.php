@@ -24,13 +24,14 @@ class DashboardController extends Controller
         $latestCheckin = $crew->checkins()->latest('mission_date')->first();
         $latestHr = $crew->readings()->where('metric_definition_id', $hrDef->id)->latest('observed_at')->first();
 
+        $baselines = $crew->baselineProfiles()->with('metric')->get()->keyBy(fn ($baseline) => $baseline->metric->code);
         $cards = [
             $this->card($hrDef, 'bi-heart-pulse', $latestHr ? number_format((float) $latestHr->value, 0) : null,
-                $latestHr?->observed_at, $latestHr?->source),
+                $latestHr?->observed_at, $latestHr?->source, null, $baselines->get('resting_heart_rate')?->baseline_value),
             $this->card($defs['sleep_duration'], 'bi-moon-stars', $latestCheckin ? number_format((float) $latestCheckin->sleep_hours, 1) : null,
-                $latestCheckin?->submitted_at, $latestCheckin?->source),
+                $latestCheckin?->submitted_at, $latestCheckin?->source, null, $baselines->get('sleep_duration')?->baseline_value),
             $this->card($defs['fatigue_rating'], 'bi-battery-half', $latestCheckin ? (string) $latestCheckin->fatigue_rating : null,
-                $latestCheckin?->submitted_at, $latestCheckin?->source, 'Scale 1–5 · higher = more fatigued'),
+                $latestCheckin?->submitted_at, $latestCheckin?->source, 'Scale 1–5 · higher = more fatigued', $baselines->get('fatigue_rating')?->baseline_value),
             $this->card($defs['exercise_duration'], 'bi-activity', $latestCheckin ? (string) $latestCheckin->exercise_minutes : null,
                 $latestCheckin?->submitted_at, $latestCheckin?->source),
         ];
@@ -91,7 +92,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function card($def, string $icon, ?string $value, ?Carbon $at, ?string $source, ?string $hint = null): array
+    private function card($def, string $icon, ?string $value, ?Carbon $at, ?string $source, ?string $hint = null, ?float $baseline = null): array
     {
         $freshness = 'no_data';
         if ($value !== null && $at) {
@@ -107,6 +108,7 @@ class DashboardController extends Controller
             'source' => $source,
             'freshness' => $freshness,
             'hint' => $hint,
+            'delta' => $value !== null && $baseline !== null ? (float) $value - $baseline : null,
         ];
     }
 

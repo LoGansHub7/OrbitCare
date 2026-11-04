@@ -24,13 +24,18 @@
             <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-label="Open menu">
                 <i class="bi bi-list" aria-hidden="true"></i>
             </button>
-            <h1 class="oc-page-title">@yield('heading')</h1>
+            <div>
+                <h1 class="oc-page-title">@yield('heading')</h1>
+                @if ($navCrew)<div class="small text-secondary d-none d-md-block">Mission day {{ $navCrew->missionDay() }} of 180 <span class="oc-mission-progress d-inline-block ms-2"><span></span></span></div>@endif
+            </div>
             @if ($navCrew)
                 <div class="ms-auto text-end small text-secondary d-none d-sm-block">
-                    <div class="fw-semibold text-dark">{{ $navCrew->crew_code }} · Mission day {{ $navCrew->missionDay() }}</div>
+                    <div class="fw-semibold">{{ $navCrew->crew_code }}</div>
                     <div>{{ $navCrew->mission->name }}</div>
                 </div>
             @endif
+            <span class="oc-link-chip d-none d-sm-inline"><i class="bi bi-broadcast" aria-hidden="true"></i> Earth link online</span>
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-theme-toggle></button>
         </header>
 
         <main class="oc-content">

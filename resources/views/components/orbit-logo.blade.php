@@ -1,0 +1,1 @@
+<svg class="oc-logo" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="9" fill="currentColor" opacity=".9"/><ellipse cx="24" cy="24" rx="21" ry="9" stroke="currentColor" stroke-width="3" transform="rotate(-28 24 24)"/><path d="M14 25h5l3-6 4 12 3-6h5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

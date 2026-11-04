@@ -19,9 +19,17 @@
     --bs-body-color: var(--oc-text);
     --bs-body-font-family: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --bs-body-font-size: 1rem;
+    --oc-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+[data-theme="night"] {
+    --oc-bg: #0B1220; --oc-card: #111A2E; --oc-text: #E5E7EB; --oc-text-2: #94A3B8; --oc-border: #1E293B;
+    --bs-body-bg: var(--oc-bg); --bs-body-color: var(--oc-text); --bs-secondary-color: #94A3B8;
+    --bs-tertiary-bg: #111A2E; --bs-border-color: #1E293B;
 }
 
 body { background: var(--oc-bg); color: var(--oc-text); }
+.font-mono, .oc-metric, .oc-mono { font-family: var(--oc-mono); font-variant-numeric: tabular-nums; }
 
 .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; font-weight: 600; }
 .btn-primary { --bs-btn-bg: #2563EB; --bs-btn-border-color: #2563EB; --bs-btn-hover-bg: #1D4ED8; --bs-btn-hover-border-color: #1D4ED8; --bs-btn-active-bg: #1E40AF; --bs-btn-active-border-color: #1E40AF; }
@@ -43,12 +51,13 @@ body { background: var(--oc-bg); color: var(--oc-text); }
 .oc-sidebar-foot { margin-top: auto; padding: 16px 12px 0; border-top: 1px solid rgba(255,255,255,.12); font-size: .875rem; }
 .oc-sidebar-foot .btn { color: #CBD5E1; border-color: rgba(255,255,255,.25); }
 .oc-main { flex: 1; min-width: 0; }
-.oc-topbar { display: flex; align-items: center; gap: 12px; padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--oc-border); }
+.oc-topbar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: var(--oc-card); border-bottom: 1px solid var(--oc-border); position: sticky; top: 0; z-index: 100; }
 .oc-page-title { font-size: 1.75rem; font-weight: 700; margin: 0; }
 .oc-content { width: 100%; padding: 24px; max-width: 1320px; margin: 0 auto; }
 
 /* Cards */
 .oc-card { background: var(--oc-card); border: 1px solid var(--oc-border); border-radius: 12px; padding: 24px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+[data-theme="night"] .oc-card { box-shadow: 0 1px 2px rgba(0,0,0,.25); }
 .oc-card-label { font-size: .875rem; font-weight: 600; color: var(--oc-text-2); display: flex; gap: 8px; align-items: center; }
 .oc-card-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
 .oc-metric { font-size: 2.1rem; font-weight: 700; line-height: 1.1; margin-top: 8px; }
@@ -86,6 +95,19 @@ body { background: var(--oc-bg); color: var(--oc-text); }
 /* Login */
 .oc-login { min-height: 100vh; background: var(--oc-navy); display: flex; align-items: center; justify-content: center; padding: 16px; }
 .oc-login-card { width: 100%; max-width: 440px; }
+.oc-login { background: radial-gradient(circle at 20% 20%, rgba(37,99,235,.32), transparent 35%), radial-gradient(circle at 80% 90%, rgba(15,118,110,.24), transparent 35%), var(--oc-navy); }
+.oc-login::before { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .35; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 48px 48px; }
+.oc-login-card { position: relative; }
+.oc-logo { display: inline-flex; width: 34px; height: 34px; color: #60A5FA; flex: 0 0 auto; }
+.oc-mission-progress { width: 140px; height: 5px; background: var(--oc-border); border-radius: 99px; overflow: hidden; }
+.oc-mission-progress > span { display:block; height:100%; width:17%; background:var(--oc-teal); }
+.oc-link-chip { border: 1px solid #99F6E4; color: var(--oc-teal); background: #F0FDFA; border-radius: 999px; padding: 4px 9px; font-size: .75rem; font-weight: 700; }
+[data-theme="night"] .oc-link-chip { background:#052e2b; color:#5eead4; border-color:#0f766e; }
+.oc-empty { text-align:center; padding: 2rem 1rem; color:var(--oc-text-2); }
+.oc-empty svg { max-width:120px; color:var(--oc-blue); margin-bottom:1rem; }
+.oc-skeleton { min-height: 1em; border-radius:6px; background:linear-gradient(90deg, var(--oc-border), var(--oc-card), var(--oc-border)); background-size:200% 100%; animation: oc-loading 1.2s infinite; }
+@keyframes oc-loading { to { background-position:-200% 0; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 @media (max-width: 575.98px) {
     .oc-content { padding: 16px; }

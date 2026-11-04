@@ -8,12 +8,14 @@
 </head>
 <body>
 <div class="oc-login">
-    <div class="oc-login-card">
-        <div class="text-center text-white mb-4">
-            <div class="oc-brand justify-content-center pb-1"><i class="bi bi-globe-americas" aria-hidden="true"></i> OrbitCare</div>
-            <div class="text-secondary">Astronaut health tracking prototype</div>
-        </div>
-
+    <div class="container position-relative"><div class="row align-items-center justify-content-center g-5">
+        <section class="col-lg-6 text-white">
+            <div class="oc-brand fs-2 p-0 mb-4"><x-orbit-logo /> OrbitCare</div>
+            <p class="display-6 fw-semibold mb-3">A calm, onboard view of mission health signals.</p>
+            <p class="text-white-50 lead">Record observations, review trends, and document follow-up while keeping data provenance and uncertainty visible.</p>
+            <p class="small border-start border-info border-3 ps-3 mb-0">Prototype / not a medical device. Experimental rules support review; they do not diagnose, treat, or clear a crew member.</p>
+        </section>
+        <div class="col-lg-5"><div class="oc-login-card mx-auto">
         <div class="oc-card">
             <form method="POST" action="{{ route('login') }}" novalidate>
                 @csrf
@@ -49,7 +51,7 @@
                 <div>Password for all: <code>orbitcare-demo</code></div>
             </div>
         @endif
-    </div>
+    </div></div></div></div>
 </div>
 </body>
 </html>

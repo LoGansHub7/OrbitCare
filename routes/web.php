@@ -21,6 +21,11 @@ Route::get('/', function () {
     return redirect()->route(auth()->user()->isAstronaut() ? 'dashboard' : 'staff.home');
 })->name('home');
 
+Route::get('/_components', function () {
+    abort_unless(app()->environment('local'), 404);
+    return view('components.preview');
+})->name('components.preview');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');

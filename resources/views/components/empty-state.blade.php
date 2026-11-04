@@ -1,0 +1,2 @@
+@props(['title' => 'Nothing to show yet', 'message' => null])
+<div class="oc-empty"><svg viewBox="0 0 120 80" fill="none"><path d="M12 61c24-42 72-42 96 0" stroke="currentColor" stroke-width="3"/><circle cx="60" cy="36" r="14" stroke="currentColor" stroke-width="3"/><path d="M60 15v-8M34 28l-7-5M86 28l7-5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><h3 class="h5">{{ $title }}</h3>@if($message)<p class="mb-0">{{ $message }}</p>@endif{{ $slot }}</div>
