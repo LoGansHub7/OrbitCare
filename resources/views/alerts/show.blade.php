@@ -137,7 +137,14 @@
                         <button class="btn btn-primary w-100" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Start review</button>
                     </form>
                 @elseif ($alert->status === 'under_review')
-                    <p class="small text-secondary">A note is required to close this alert. Do not enter treatment instructions.</p>
+                    <p class="small text-secondary">Record an observation or a re-check, then close with a note. Do not enter treatment instructions.</p>
+                    <form method="POST" action="{{ route('alerts.update', ['alertId' => $alert->id]) }}" class="mb-3">
+                        @csrf
+                        <input type="hidden" name="action" value="log_followup">
+                        <label for="followup_notes" class="form-label">Follow-up observation</label>
+                        <textarea id="followup_notes" name="notes" class="form-control mb-2" rows="3" maxlength="2000" placeholder="For example: rechecked measurement or logged an observation."></textarea>
+                        <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-journal-plus" aria-hidden="true"></i> Record follow-up</button>
+                    </form>
                     <form method="POST" action="{{ route('alerts.update', ['alertId' => $alert->id]) }}">
                         @csrf
                         <input type="hidden" name="action" value="close">

@@ -89,6 +89,7 @@ class DashboardController extends Controller
             'latestCheckin' => $latestCheckin,
             'checkedInToday' => $checkins->has(today()->toDateString()),
             'alerts' => $alerts,
+            'completeness' => $latestCheckin ? 100 : 0,
         ]);
     }
 

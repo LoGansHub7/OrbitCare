@@ -37,7 +37,7 @@ class AlertController extends Controller
     {
         $crew = $request->user()->crewProfile()->firstOrFail();
         $data = $request->validate([
-            'action' => ['required', Rule::in(['acknowledge', 'start_review', 'close'])],
+            'action' => ['required', Rule::in(['acknowledge', 'start_review', 'close', 'log_followup'])],
             'notes' => ['nullable', 'string', 'max:2000', Rule::requiredIf($request->input('action') === 'close')],
         ]);
         $actorId = $request->user()->id;
@@ -45,6 +45,13 @@ class AlertController extends Controller
         DB::transaction(function () use ($crew, $alertId, $data, $actorId): void {
             $alert = $crew->alerts()->lockForUpdate()->findOrFail($alertId);
             $previousStatus = $alert->status;
+
+            if ($data['action'] === 'log_followup') {
+                abort_unless($previousStatus === 'under_review', 422, 'Start a review before adding a follow-up.');
+                FollowUp::create(['alert_id' => $alert->id, 'actor_id' => $actorId, 'action' => 'observation_logged', 'notes' => $data['notes'] ?? null]);
+                AuditEvent::record('alert.followup_logged', $alert);
+                return;
+            }
 
             [$nextStatus, $followUpAction] = match ([$data['action'], $previousStatus]) {
                 ['acknowledge', 'open'] => ['acknowledged', 'acknowledged'],
