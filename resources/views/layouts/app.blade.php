@@ -7,7 +7,7 @@
     @vite(['resources/js/app.js'])
 </head>
 <body>
-@php $navCrew = auth()->user()->isAstronaut() ? auth()->user()->crewProfile?->load('mission') : null; @endphp
+@php $navCrew = auth()->user()->isAstronaut() ? auth()->user()->crewProfile?->load('mission') : null; $navMission = $navCrew?->mission ?? \App\Models\Mission::query()->orderByDesc('starts_on')->first(); @endphp
 <div class="oc-shell">
     <aside class="oc-sidebar oc-sidebar-fixed d-none d-lg-flex flex-column">
         @include('partials.sidebar')
@@ -34,7 +34,14 @@
                     <div>{{ $navCrew->mission->name }}</div>
                 </div>
             @endif
-            <span class="oc-link-chip d-none d-sm-inline"><i class="bi bi-broadcast" aria-hidden="true"></i> Earth link online</span>
+            @if ($navMission)
+                <span class="oc-link-chip d-none d-sm-inline">
+                    <i class="bi bi-broadcast" aria-hidden="true"></i> Earth link {{ $navMission->earth_link_status }}
+                    @if ($navMission->earth_link_status === 'delayed')
+                        · {{ $navMission->earth_link_delay_minutes }}m
+                    @endif
+                </span>
+            @endif
             <button type="button" class="btn btn-outline-secondary btn-sm" data-theme-toggle></button>
         </header>
 

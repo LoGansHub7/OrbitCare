@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Alert;
 use App\Models\AuditEvent;
 use App\Models\FollowUp;
+use App\Models\EarthSyncPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -39,6 +40,7 @@ class AlertController extends Controller
         $data = $request->validate([
             'action' => ['required', Rule::in(['acknowledge', 'start_review', 'close', 'log_followup'])],
             'notes' => ['nullable', 'string', 'max:2000', Rule::requiredIf($request->input('action') === 'close')],
+            'share_with_earth' => ['nullable', 'boolean'],
         ]);
         $actorId = $request->user()->id;
 
@@ -48,7 +50,8 @@ class AlertController extends Controller
 
             if ($data['action'] === 'log_followup') {
                 abort_unless($previousStatus === 'under_review', 422, 'Start a review before adding a follow-up.');
-                FollowUp::create(['alert_id' => $alert->id, 'actor_id' => $actorId, 'action' => 'observation_logged', 'notes' => $data['notes'] ?? null]);
+                $followup = FollowUp::create(['alert_id' => $alert->id, 'actor_id' => $actorId, 'action' => 'observation_logged', 'notes' => $data['notes'] ?? null, 'share_with_earth' => $data['share_with_earth'] ?? false]);
+                $this->queueForEarth($crew, $followup);
                 AuditEvent::record('alert.followup_logged', $alert);
                 return;
             }
@@ -69,12 +72,14 @@ class AlertController extends Controller
             }
 
             $alert->update(['status' => $nextStatus] + $timestamps);
-            FollowUp::create([
+            $followup = FollowUp::create([
                 'alert_id' => $alert->id,
                 'actor_id' => $actorId,
                 'action' => $followUpAction,
                 'notes' => $data['notes'] ?? null,
+                'share_with_earth' => $data['share_with_earth'] ?? false,
             ]);
+            $this->queueForEarth($crew, $followup);
             AuditEvent::record('alert.status_changed', $alert, [
                 'from' => $previousStatus,
                 'to' => $nextStatus,
@@ -83,5 +88,13 @@ class AlertController extends Controller
         });
 
         return redirect()->route('alerts.show', $alertId)->with('status', 'Alert updated and follow-up recorded.');
+    }
+
+    private function queueForEarth($crew, FollowUp $followup): void
+    {
+        if (! $followup->share_with_earth) return;
+        $mission = $crew->mission;
+        $delay = $mission->earth_link_status === 'delayed' ? $mission->earth_link_delay_minutes : 0;
+        EarthSyncPackage::create(['mission_id'=>$mission->id, 'crew_profile_id'=>$crew->id, 'followup_id'=>$followup->id, 'status'=>$mission->earth_link_status === 'online' ? 'sent' : 'queued', 'available_at'=>now()->addMinutes($delay), 'sent_at'=>$mission->earth_link_status === 'online' ? now() : null, 'payload'=>['followup_action'=>$followup->action, 'notes'=>$followup->notes, 'privacy_notice'=>'Contains only the explicitly marked follow-up summary.']]);
     }
 }

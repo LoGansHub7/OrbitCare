@@ -143,6 +143,7 @@
                         <input type="hidden" name="action" value="log_followup">
                         <label for="followup_notes" class="form-label">Follow-up observation</label>
                         <textarea id="followup_notes" name="notes" class="form-control mb-2" rows="3" maxlength="2000" placeholder="For example: rechecked measurement or logged an observation."></textarea>
+                        <label class="form-check small mb-2"><input class="form-check-input" type="checkbox" name="share_with_earth" value="1"> <span class="form-check-label">Queue this summary for Earth support</span></label>
                         <button class="btn btn-outline-primary w-100" type="submit"><i class="bi bi-journal-plus" aria-hidden="true"></i> Record follow-up</button>
                     </form>
                     <form method="POST" action="{{ route('alerts.update', ['alertId' => $alert->id]) }}">
@@ -150,6 +151,7 @@
                         <input type="hidden" name="action" value="close">
                         <label for="notes" class="form-label">Closing note</label>
                         <textarea id="notes" name="notes" class="form-control mb-2" rows="4" maxlength="2000" required>{{ old('notes') }}</textarea>
+                        <label class="form-check small mb-2"><input class="form-check-input" type="checkbox" name="share_with_earth" value="1"> <span class="form-check-label">Queue this closure summary for Earth support</span></label>
                         @error('notes')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
                         <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check-circle" aria-hidden="true"></i> Close alert</button>
                     </form>
