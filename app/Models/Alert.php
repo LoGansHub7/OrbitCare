@@ -35,4 +35,9 @@ class Alert extends Model
     {
         return $this->hasMany(FollowUp::class);
     }
+
+    public function evidenceSnapshots(): HasMany
+    {
+        return $this->hasMany(AlertEvidence::class);
+    }
 }

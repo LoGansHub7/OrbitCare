@@ -48,10 +48,12 @@ class AlertEvaluationService
                     'closed_at' => $existing->closed_at ?? $result['closed_at'],
                 ]);
 
+                $existing->evidenceSnapshots()->create(['snapshot' => $result['evidence']]);
+
                 return;
             }
 
-            Alert::query()->create([
+            $alert = Alert::query()->create([
                 'crew_profile_id' => $crew->id,
                 'alert_rule_id' => $rule->id,
                 'status' => $result['status'],
@@ -64,6 +66,7 @@ class AlertEvaluationService
                 'acknowledged_at' => $result['acknowledged_at'],
                 'closed_at' => $result['closed_at'],
             ]);
+            $alert->evidenceSnapshots()->create(['snapshot' => $result['evidence']]);
         });
     }
 
@@ -83,8 +86,8 @@ class AlertEvaluationService
             ->take(7)
             ->get();
 
-        if ($checkins->count() < ($rule->parameters['min_samples'] ?? 3)) {
-            return null;
+        if ($checkins->count() < ($rule->parameters['min_samples'] ?? 3) || $checkins->first()?->submitted_at->lt(now()->subHours(36))) {
+            return $this->insufficient($rule, 'Sleep and fatigue cannot be evaluated because the available check-in data is insufficient or stale.', ['sample_count' => $checkins->count()]);
         }
 
         $sleepBaseline = $this->baselineFor($crew, 'sleep_duration');
@@ -92,11 +95,11 @@ class AlertEvaluationService
         $recentWindow = $checkins->take(3);
         $avgSleep = round((float) $recentWindow->avg('sleep_hours'), 2);
         $avgFatigue = round((float) $recentWindow->avg('fatigue_rating'), 2);
-        $sleepThreshold = (float) ($rule->parameters['sleep_threshold_hours'] ?? 6.5);
-        $fatigueThreshold = (float) ($rule->parameters['fatigue_threshold'] ?? 3.5);
+        $sleepDelta = (float) ($rule->parameters['sleep_delta_hours'] ?? 1.5);
+        $fatigueDelta = (float) ($rule->parameters['fatigue_delta'] ?? 1.0);
 
-        $triggered = $avgSleep <= min($sleepBaseline, $sleepThreshold)
-            && $avgFatigue >= max($fatigueBaseline, $fatigueThreshold);
+        $triggered = $avgSleep <= ($sleepBaseline - $sleepDelta)
+            && $avgFatigue >= ($fatigueBaseline + $fatigueDelta);
 
         if (! $triggered) {
             return null;
@@ -104,14 +107,14 @@ class AlertEvaluationService
 
         return [
             'status' => 'open',
-            'severity' => 'review',
+            'severity' => $avgFatigue >= 4 && $checkins->take(5)->count() >= 5 ? 'priority_review' : 'review',
             'summary' => 'Recent sleep and fatigue trend warrants review.',
             'explanation' => sprintf(
-                'The latest three-day window averaged %.1f hours of sleep and %.1f on fatigue, compared with a baseline of %.1f hours and %.1f fatigue. This is an experimental rule, not a diagnosis.',
+                'Your sleep averaged %.1f hours over the last 3 days versus a baseline of %.1f hours, while fatigue averaged %.1f versus %.1f. This is an experimental rule (v%s), not a diagnosis.',
                 $avgSleep,
                 $avgFatigue,
                 $sleepBaseline,
-                $fatigueBaseline,
+                $fatigueBaseline, $rule->version,
             ),
             'evidence' => [
                 'window_days' => 3,
@@ -140,8 +143,8 @@ class AlertEvaluationService
             ->take(7)
             ->get();
 
-        if ($readings->count() < ($rule->parameters['min_samples'] ?? 3)) {
-            return null;
+        if ($readings->count() < ($rule->parameters['min_samples'] ?? 3) || $readings->first()?->observed_at->lt(now()->subHours($def->freshness_hours))) {
+            return $this->insufficient($rule, 'Resting heart rate cannot be evaluated because the available readings are insufficient or stale.', ['sample_count' => $readings->count()]);
         }
 
         $baseline = $this->baselineFor($crew, 'resting_heart_rate');
@@ -156,7 +159,7 @@ class AlertEvaluationService
 
         return [
             'status' => 'open',
-            'severity' => 'review',
+            'severity' => $avg >= ($baseline + 15) ? 'priority_review' : 'review',
             'summary' => 'Resting heart rate has risen above the baseline trend.',
             'explanation' => sprintf(
                 'The latest three-day average resting heart rate is %.1f bpm, which is %.1f bpm above the individual baseline of %.1f bpm. This is an experimental alert and not a medical diagnosis.',
@@ -198,5 +201,10 @@ class AlertEvaluationService
         }
 
         return (float) $baseline->baseline_value;
+    }
+
+    private function insufficient(AlertRule $rule, string $explanation, array $evidence): array
+    {
+        return ['status' => 'open', 'severity' => 'insufficient_data', 'summary' => 'Insufficient data for experimental evaluation.', 'explanation' => $explanation, 'evidence' => $evidence + ['rule_version' => $rule->version], 'acknowledged_at' => null, 'closed_at' => null];
     }
 }
