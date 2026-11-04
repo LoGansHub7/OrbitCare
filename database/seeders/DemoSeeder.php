@@ -46,6 +46,8 @@ class DemoSeeder extends Seeder
         $fatigueId = MetricDefinition::where('code', 'fatigue_rating')->value('id');
 
         foreach ($crew as [$code, $name, $email, $scenario, $lastDaysAgo]) {
+            // Fixed per-scenario seeds make the fictional data varied but repeatable.
+            mt_srand(crc32($code));
             $user = User::updateOrCreate(['email' => $email], [
                 'name' => $name, 'password' => self::PASSWORD, 'role' => User::ROLE_ASTRONAUT, 'is_active' => true,
             ]);
@@ -81,22 +83,24 @@ class DemoSeeder extends Seeder
 
             for ($i = 0; $i < 14; $i++) { // oldest -> newest
                 $date = today()->subDays($lastDaysAgo + (13 - $i));
-                $w = sin($i * 1.7);
+                $sleepNoise = mt_rand(-25, 25) / 100;
+                $heartRateNoise = mt_rand(-18, 18) / 10;
+                $exerciseNoise = mt_rand(-7, 7);
                 $drift = max(0, ($i - 4) / 9); // 0 until day 4, then ramps to 1
 
                 if ($scenario === 'declining') {
-                    $sleep = 7.3 - 2.6 * $drift + 0.2 * $w;
+                    $sleep = 7.3 - 2.6 * $drift + $sleepNoise;
                     $quality = max(1, 4 - (int) floor(max(0, $i - 4) / 3));
                     $fatigue = min(5, 2 + (int) floor(max(0, $i - 4) / 3));
-                    $hr = 58 + 10 * $drift + 1.5 * sin($i * 2.1);
-                    $exercise = max(10, 45 - 3 * max(0, $i - 4));
+                    $hr = 58 + 10 * $drift + $heartRateNoise;
+                    $exercise = max(10, 45 - 3 * max(0, $i - 4) + $exerciseNoise);
                     $notes = $i >= 11 ? 'Difficulty concentrating.' : null;
                 } else {
-                    $sleep = 7.3 + 0.3 * $w;
-                    $quality = $w < -0.6 ? 3 : 4;
-                    $fatigue = $w > 0.9 ? 3 : 2;
-                    $hr = 58 + 2 * sin($i * 2.1);
-                    $exercise = 45 + (int) round(10 * cos($i));
+                    $sleep = 7.3 + $sleepNoise;
+                    $quality = $sleepNoise < -0.16 ? 3 : 4;
+                    $fatigue = $sleepNoise > 0.18 ? 3 : 2;
+                    $hr = 58 + $heartRateNoise;
+                    $exercise = 45 + $exerciseNoise;
                     $notes = null;
                 }
 

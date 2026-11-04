@@ -72,7 +72,9 @@ class DashboardController extends Controller
 
         $labels = $rows->pluck('label')->all();
         $charts = [
-            'hr' => $this->chart('line', 'Resting heart rate (daily average)', 'bpm', '#B91C1C', 'rgba(185,28,28,.10)', $labels, $rows->pluck('hr')->all(), null, null),
+            // A fixed clinical-context display range prevents normal day-to-day variation
+            // from being visually exaggerated. This is presentation only, not a threshold.
+            'hr' => $this->chart('line', 'Resting heart rate (daily average)', 'bpm', '#B91C1C', 'rgba(185,28,28,.10)', $labels, $rows->pluck('hr')->all(), 40, 100),
             'sleep' => $this->chart('bar', 'Sleep duration', 'hours', '#2563EB', 'rgba(37,99,235,.65)', $labels, $rows->pluck('sleep')->all(), 0, 12),
             'fatigue' => $this->chart('line', 'Fatigue rating', 'score (1–5, higher = more fatigued)', '#0F766E', 'rgba(15,118,110,.10)', $labels, $rows->pluck('fatigue')->all(), 1, 5),
         ];

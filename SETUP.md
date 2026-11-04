@@ -58,3 +58,7 @@ Alert rules + engine, alert detail/follow-ups, medical-officer crew overview, ad
 - "Alerts" panel is a placeholder; "no flag" will never be shown as "healthy".
 - Times are stored/displayed in UTC (labelled).
 - Verify the 2026 Space Apps rules on advance work before using this as the competition submission.
+
+## Troubleshooting local assets
+
+OrbitCare bundles its fonts, icons, and scripts for offline use. After an asset change, run `npm run build` and hard-refresh the browser (`Ctrl+F5`). If a previous development session left a `public/hot` file behind, stop Vite and remove that file before using the XAMPP URL; it makes Laravel look for a development server instead of the compiled assets.
