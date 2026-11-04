@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReadingController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DemoController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/research', [ReportController::class, 'research'])->name('research.index');
+    Route::get('/help', [ReportController::class, 'help'])->name('help.index');
+    Route::get('/how-alerts-work', [ReportController::class, 'alertCatalog'])->name('alerts.catalog');
 
     // Medical officer / admin area (built out in later phases)
     Route::middleware(EnsureRole::class.':medical_officer,admin')->group(function () {
@@ -45,6 +48,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
         Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
         Route::patch('/missions/{mission}/earth-link', [AdminController::class, 'updateMissionLink'])->name('missions.link');
+        Route::get('/demo', [DemoController::class, 'index'])->name('demo');
+        Route::post('/demo/reset', [DemoController::class, 'reset'])->name('demo.reset');
+        Route::post('/demo/scenario', [DemoController::class, 'scenario'])->name('demo.scenario');
+        Route::post('/demo/mission-day', [DemoController::class, 'missionDay'])->name('demo.mission-day');
     });
 
     Route::middleware(EnsureRole::class.':medical_officer')->group(function () {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CrewProfile;
 use App\Models\MetricDefinition;
+use App\Models\AlertRule;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -12,6 +13,16 @@ class ReportController extends Controller
     public function research()
     {
         return view('research.index');
+    }
+
+    public function help()
+    {
+        return view('help.index');
+    }
+
+    public function alertCatalog()
+    {
+        return view('alerts.catalog', ['rules' => AlertRule::query()->orderBy('code')->get()]);
     }
 
     public function showSelf(Request $request)

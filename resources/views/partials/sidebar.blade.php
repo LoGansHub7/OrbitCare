@@ -11,10 +11,12 @@
         <a href="{{ route('reports.self') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Reports</a>
     @else
         <a href="{{ route('staff.home') }}" class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"><i class="bi bi-people" aria-hidden="true"></i> Overview</a>
-        @if(auth()->user()->isAdmin())<a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}"><i class="bi bi-sliders" aria-hidden="true"></i> Administration</a>@endif
+        @if(auth()->user()->isAdmin())<a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.index') ? 'active' : '' }}"><i class="bi bi-sliders" aria-hidden="true"></i> Administration</a><a href="{{ route('admin.demo') }}" class="{{ request()->routeIs('admin.demo*') ? 'active' : '' }}"><i class="bi bi-play-circle" aria-hidden="true"></i> Demo mission control</a>@endif
     @endif
     <div class="small text-uppercase text-white-50 px-2 mt-3">Mission</div>
     <a href="{{ route('research.index') }}" class="{{ request()->routeIs('research.*') ? 'active' : '' }}"><i class="bi bi-journal-text" aria-hidden="true"></i> Research & limits</a>
+    <a href="{{ route('alerts.catalog') }}" class="{{ request()->routeIs('alerts.catalog') ? 'active' : '' }}"><i class="bi bi-info-circle" aria-hidden="true"></i> How alerts work</a>
+    <a href="{{ route('help.index') }}" class="{{ request()->routeIs('help.*') ? 'active' : '' }}"><i class="bi bi-question-circle" aria-hidden="true"></i> Help & glossary</a>
 </nav>
 <div class="oc-sidebar-foot">
     <div class="text-white fw-semibold">{{ auth()->user()->name }}</div>
