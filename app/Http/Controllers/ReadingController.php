@@ -14,20 +14,22 @@ class ReadingController extends Controller
     public function index(Request $request)
     {
         $crew = $request->user()->crewProfile()->firstOrFail();
-        $metric = MetricDefinition::where('code', 'resting_heart_rate')->firstOrFail();
+        $metricCode = $request->query('metric', 'resting_heart_rate');
+        $metric = MetricDefinition::where('code', $metricCode)->firstOrFail();
+        $metrics = MetricDefinition::whereNotIn('code', ['sleep_duration', 'sleep_quality', 'fatigue_rating', 'exercise_duration'])->orderBy('category')->orderBy('label')->get();
 
         $readings = $crew->readings()
             ->where('metric_definition_id', $metric->id)
             ->latest('observed_at')
             ->paginate(15);
 
-        return view('readings.index', compact('metric', 'readings'));
+        return view('readings.index', compact('metric', 'metrics', 'readings'));
     }
 
     public function store(Request $request)
     {
         $crew = $request->user()->crewProfile()->firstOrFail();
-        $metric = MetricDefinition::where('code', 'resting_heart_rate')->firstOrFail();
+        $metric = MetricDefinition::where('code', $request->string('metric_code', 'resting_heart_rate')->toString())->firstOrFail();
 
         // Bounds are input plausibility checks (data quality), not medical thresholds.
         $data = $request->validate([
@@ -46,6 +48,6 @@ class ReadingController extends Controller
         AuditEvent::record('reading.created', $reading);
         app(AlertEvaluationService::class)->evaluateCrew($crew);
 
-        return redirect()->route('readings.index')->with('status', 'Reading saved.');
+        return redirect()->route('readings.index', ['metric' => $metric->code])->with('status', 'Reading saved.');
     }
 }

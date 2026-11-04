@@ -18,6 +18,15 @@
                                value="{{ old('sleep_hours', $existing?->sleep_hours) }}" class="form-control @error('sleep_hours') is-invalid @enderror" required>
                         @error('sleep_hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+                    <div class="col-12"><hr><div class="fw-semibold mb-1">Wellbeing <span class="text-secondary fw-normal">(optional self-report)</span></div><p class="small text-secondary">These neutral observations support a trend view; they are not diagnostic.</p></div>
+                    @foreach (['mood_rating' => 'Mood (5 = best)', 'stress_rating' => 'Stress (5 = highest)', 'social_connectedness_rating' => 'Connectedness (5 = most connected)'] as $field => $label)
+                    <div class="col-12 col-md-4"><label for="{{ $field }}" class="form-label">{{ $label }}</label><select id="{{ $field }}" name="{{ $field }}" class="form-select"><option value="">Not recorded</option>@for($value = 1; $value <= 5; $value++)<option value="{{ $value }}" @selected((string)old($field, $existing?->$field) === (string)$value)>{{ $value }}</option>@endfor</select></div>
+                    @endforeach
+                    <div class="col-12"><hr><div class="fw-semibold mb-2">Exercise countermeasures <span class="text-secondary fw-normal">(optional)</span></div></div>
+                    @foreach (['planned_aerobic_minutes' => 'Planned aerobic (min)', 'completed_aerobic_minutes' => 'Completed aerobic (min)', 'planned_resistive_minutes' => 'Planned resistive (min)', 'completed_resistive_minutes' => 'Completed resistive (min)'] as $field => $label)
+                    <div class="col-6 col-md-3"><label for="{{ $field }}" class="form-label">{{ $label }}</label><input id="{{ $field }}" name="{{ $field }}" type="number" min="0" max="600" class="form-control" value="{{ old($field, $existing?->$field) }}"></div>
+                    @endforeach
+                    <div class="col-12"><label class="form-label d-block">Symptoms <span class="text-secondary fw-normal">(optional self-report)</span></label>@php($selectedTags = old('symptom_tags', $existing?->symptom_tags ?? []))<div class="d-flex flex-wrap gap-3">@foreach(['headache'=>'Headache','nausea'=>'Nausea','congestion'=>'Congestion','skin_irritation'=>'Skin irritation','vision_change'=>'Vision change','back_pain'=>'Back pain'] as $tag => $label)<label class="form-check"><input class="form-check-input" name="symptom_tags[]" value="{{ $tag }}" type="checkbox" @checked(in_array($tag, $selectedTags))> <span class="form-check-label">{{ $label }}</span></label>@endforeach</div></div>
                     <div class="col-12 col-md-6">
                         <label for="exercise_minutes" class="form-label">Exercise (minutes)</label>
                         <input id="exercise_minutes" name="exercise_minutes" type="number" step="1" min="0" max="600" inputmode="numeric"

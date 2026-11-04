@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Readings')
-@section('heading', 'Resting heart rate readings')
+@section('heading', 'Vitals & environment readings')
 @section('content')
 <div class="row g-3">
     <div class="col-12 col-lg-4">
@@ -8,8 +8,9 @@
             <div class="oc-card-title">Add a reading</div>
             <form method="POST" action="{{ route('readings.store') }}" novalidate>
                 @csrf
+                <div class="mb-3"><label for="metric_code" class="form-label">Indicator</label><select id="metric_code" name="metric_code" class="form-select" onchange="window.location='{{ route('readings.index') }}?metric='+this.value">@foreach($metrics as $option)<option value="{{ $option->code }}" @selected($metric->id === $option->id)>{{ $option->label }} ({{ $option->unit }})</option>@endforeach</select></div>
                 <div class="mb-3">
-                    <label for="value" class="form-label">Resting heart rate ({{ $metric->unit }})</label>
+                    <label for="value" class="form-label">{{ $metric->label }} ({{ $metric->unit }})</label>
                     <input id="value" name="value" type="number" step="0.1" inputmode="decimal" value="{{ old('value') }}"
                            class="form-control @error('value') is-invalid @enderror" required>
                     <div class="form-text">Accepted range {{ (int) $metric->min_value }}–{{ (int) $metric->max_value }} (data-entry check only).</div>
@@ -27,7 +28,7 @@
     </div>
     <div class="col-12 col-lg-8">
         <div class="oc-card">
-            <div class="oc-card-title">History</div>
+            <div class="oc-card-title">{{ $metric->label }} history</div>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead><tr><th>Measured (UTC)</th><th>Value</th><th>Source</th></tr></thead>

@@ -30,6 +30,15 @@ class CheckinController extends Controller
             'sleep_quality' => ['required', 'integer', 'between:1,5'],
             'fatigue_rating' => ['required', 'integer', 'between:1,5'],
             'exercise_minutes' => ['required', 'integer', 'between:0,600'],
+            'mood_rating' => ['nullable', 'integer', 'between:1,5'],
+            'stress_rating' => ['nullable', 'integer', 'between:1,5'],
+            'social_connectedness_rating' => ['nullable', 'integer', 'between:1,5'],
+            'planned_aerobic_minutes' => ['nullable', 'integer', 'between:0,600'],
+            'completed_aerobic_minutes' => ['nullable', 'integer', 'between:0,600'],
+            'planned_resistive_minutes' => ['nullable', 'integer', 'between:0,600'],
+            'completed_resistive_minutes' => ['nullable', 'integer', 'between:0,600'],
+            'symptom_tags' => ['nullable', 'array'],
+            'symptom_tags.*' => ['string', 'in:headache,nausea,congestion,skin_irritation,vision_change,back_pain'],
             'symptom_notes' => ['nullable', 'string', 'max:1000'],
             'source' => ['sometimes', 'string', 'in:manual,csv_import,simulation'],
         ]);
@@ -55,6 +64,9 @@ class CheckinController extends Controller
                 'source' => 'manual',
                 'submitted_at' => now(),
             ]);
+            foreach ($data['symptom_tags'] ?? [] as $tag) {
+                $checkin->symptomLogs()->create(['crew_profile_id' => $crew->id, 'tag' => $tag, 'source' => $data['source']]);
+            }
             AuditEvent::record('checkin.created', $checkin);
 
             return false;

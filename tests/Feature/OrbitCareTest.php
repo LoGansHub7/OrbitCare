@@ -105,6 +105,26 @@ class OrbitCareTest extends TestCase
             ->assertSessionHasErrors('value');
     }
 
+    public function test_astronaut_can_record_an_extended_checkin_and_a_supported_vital(): void
+    {
+        $user = $this->astronaut();
+
+        $this->actingAs($user)->post('/check-in', $this->checkinPayload([
+            'mood_rating' => 4, 'stress_rating' => 2, 'social_connectedness_rating' => 4,
+            'planned_aerobic_minutes' => 30, 'completed_aerobic_minutes' => 30,
+            'planned_resistive_minutes' => 20, 'completed_resistive_minutes' => 20,
+            'symptom_tags' => ['headache'],
+        ]))->assertRedirect('/dashboard');
+        $this->assertDatabaseHas('daily_checkins', ['mood_rating' => 4, 'stress_rating' => 2]);
+        $this->assertDatabaseHas('symptom_logs', ['tag' => 'headache']);
+
+        $this->actingAs($user)->post('/readings', [
+            'metric_code' => 'body_temperature', 'value' => 36.8,
+            'observed_at' => now()->subMinute()->format('Y-m-d\TH:i'),
+        ])->assertRedirect(route('readings.index', ['metric' => 'body_temperature']));
+        $this->assertDatabaseHas('health_readings', ['value' => 36.8]);
+    }
+
     public function test_astronaut_cannot_see_another_astronauts_readings(): void
     {
         $me = $this->astronaut('OC-T1');
