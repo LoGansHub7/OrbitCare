@@ -255,6 +255,16 @@ class OrbitCareTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_administrator_can_manage_account_state_but_not_crew_health_records(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'is_active' => true]);
+        $astronaut = $this->astronaut('OC-ADMIN-CHECK');
+
+        $this->actingAs($admin)->get(route('admin.index'))->assertOk()->assertSee('Mission administration')->assertDontSee('OC-ADMIN-CHECK');
+        $this->actingAs($admin)->patch(route('admin.users.update', $astronaut), ['role' => 'astronaut', 'is_active' => 0])->assertRedirect();
+        $this->assertDatabaseHas('users', ['id' => $astronaut->id, 'is_active' => 0]);
+    }
+
     public function test_astronaut_report_and_csv_export_are_scoped_to_own_records(): void
     {
         $me = $this->astronaut('OC-REPORT-ME');

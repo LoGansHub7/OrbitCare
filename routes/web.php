@@ -7,6 +7,7 @@ use App\Http\Controllers\CrewOverviewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReadingController;
+use App\Http\Controllers\AdminController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,12 @@ Route::middleware('auth')->group(function () {
     // Medical officer / admin area (built out in later phases)
     Route::middleware(EnsureRole::class.':medical_officer,admin')->group(function () {
         Route::get('/staff', [CrewOverviewController::class, 'index'])->name('staff.home');
+    });
+
+    Route::middleware(EnsureRole::class.':admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::patch('/missions/{mission}/earth-link', [AdminController::class, 'updateMissionLink'])->name('missions.link');
     });
 
     Route::middleware(EnsureRole::class.':medical_officer')->group(function () {

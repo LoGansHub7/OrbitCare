@@ -11,6 +11,7 @@
         <a href="{{ route('reports.self') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Reports</a>
     @else
         <a href="{{ route('staff.home') }}" class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"><i class="bi bi-people" aria-hidden="true"></i> Overview</a>
+        @if(auth()->user()->isAdmin())<a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}"><i class="bi bi-sliders" aria-hidden="true"></i> Administration</a>@endif
     @endif
     <div class="small text-uppercase text-white-50 px-2 mt-3">Mission</div>
     <a href="{{ route('research.index') }}" class="{{ request()->routeIs('research.*') ? 'active' : '' }}"><i class="bi bi-journal-text" aria-hidden="true"></i> Research & limits</a>
