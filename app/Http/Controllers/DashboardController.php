@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MetricDefinition;
+use App\Services\AlertEvaluationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -38,9 +39,12 @@ class DashboardController extends Controller
 
         $alerts = $crew->alerts()
             ->with('rule')
-            ->whereIn('status', ['open', 'acknowledged', 'under_review'])
+            ->where('status', '!=', 'closed')
+            ->where('severity', '!=', 'insufficient_data')
             ->orderByDesc('last_evaluated_at')
             ->get();
+        $evaluationStates = app(AlertEvaluationService::class)->currentStates($crew);
+        $hasInsufficientData = in_array('insufficient_data', $evaluationStates, true);
 
         $days = collect(range($range - 1, 0))->map(fn ($n) => today()->subDays($n));
         $from = $days->first();
@@ -89,6 +93,7 @@ class DashboardController extends Controller
             'latestCheckin' => $latestCheckin,
             'checkedInToday' => $checkins->has(today()->toDateString()),
             'alerts' => $alerts,
+            'hasInsufficientData' => $hasInsufficientData,
             'completeness' => $latestCheckin ? 100 : 0,
         ]);
     }

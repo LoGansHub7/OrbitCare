@@ -20,7 +20,7 @@ class AlertRuleSeeder extends Seeder
                 'severity' => 'review',
                 'parameters' => [
                     'min_samples' => 3,
-                    'sleep_delta_hours' => 1.5,
+                    'sleep_delta_hours' => 1.0,
                     'fatigue_delta' => 1.0,
                 ],
                 'explanation_template' => 'Recent sleep and fatigue trend suggests a review. This is an experimental alert, not a medical diagnosis.',

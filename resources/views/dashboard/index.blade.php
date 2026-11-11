@@ -22,7 +22,12 @@
     </div>
 
     <div class="row g-3 mb-3">
-        <div class="col-12 col-xl-8"><div class="oc-card h-100"><div class="oc-card-title">Body-system readiness map <span class="oc-unit">review signals, not a health score</span></div><div class="row g-2 text-center">@foreach(['Cardiovascular'=>'bi-heart-pulse','Sleep & circadian'=>'bi-moon-stars','Musculoskeletal'=>'bi-person-walking','Behavioural'=>'bi-chat-heart','Immune / general'=>'bi-shield-plus','Radiation / environment'=>'bi-broadcast'] as $system=>$icon)<div class="col-6 col-md-4"><a href="{{ route('alerts.index') }}" class="border rounded-3 p-3 d-block text-decoration-none text-reset h-100"><i class="bi {{ $icon }} fs-3 text-primary" aria-hidden="true"></i><div class="small fw-semibold mt-2">{{ $system }}</div><span class="oc-badge {{ $alerts->isNotEmpty() ? 'oc-badge-review' : 'oc-badge-ok' }} mt-2"><i class="bi {{ $alerts->isNotEmpty() ? 'bi-eye' : 'bi-check-circle' }}" aria-hidden="true"></i>{{ $alerts->isNotEmpty() ? 'Review signals' : 'No flag' }}</span></a></div>@endforeach</div></div></div>
+        @php
+            $signalLabel = $alerts->isNotEmpty() ? 'Review signals' : ($hasInsufficientData ? 'Insufficient data' : 'No flag');
+            $signalClass = $alerts->isNotEmpty() || $hasInsufficientData ? 'oc-badge-review' : 'oc-badge-ok';
+            $signalIcon = $alerts->isNotEmpty() ? 'bi-eye' : ($hasInsufficientData ? 'bi-exclamation-triangle' : 'bi-check-circle');
+        @endphp
+        <div class="col-12 col-xl-8"><div class="oc-card h-100"><div class="oc-card-title">Body-system readiness map <span class="oc-unit">review signals, not a health score</span></div><div class="row g-2 text-center">@foreach(['Cardiovascular'=>'bi-heart-pulse','Sleep & circadian'=>'bi-moon-stars','Musculoskeletal'=>'bi-person-walking','Behavioural'=>'bi-chat-heart','Immune / general'=>'bi-shield-plus','Radiation / environment'=>'bi-broadcast'] as $system=>$icon)<div class="col-6 col-md-4"><a href="{{ route('alerts.index') }}" class="border rounded-3 p-3 d-block text-decoration-none text-reset h-100"><i class="bi {{ $icon }} fs-3 text-primary" aria-hidden="true"></i><div class="small fw-semibold mt-2">{{ $system }}</div><span class="oc-badge {{ $signalClass }} mt-2"><i class="bi {{ $signalIcon }}" aria-hidden="true"></i>{{ $signalLabel }}</span></a></div>@endforeach</div></div></div>
         <div class="col-12 col-xl-4"><div class="oc-card h-100 d-flex align-items-center justify-content-center"><x-stat-ring :value="$completeness" label="Today’s input completeness"/><p class="small text-secondary text-center mt-3 mb-0">Completeness measures recorded inputs only; it is not a health score.</p></div></div>
     </div>
 
@@ -52,8 +57,13 @@
                         <div class="small text-secondary">{{ $alert->rule?->code ?? 'experimental_rule' }} · {{ $alert->last_evaluated_at?->format('M j') }}</div>
                     </a>
                 @empty
-                    <p class="mb-2"><span class="oc-badge oc-badge-ok"><i class="bi bi-check-circle" aria-hidden="true"></i> No flag</span></p>
-                    <p class="small text-secondary mb-0">“No flag” only means no implemented rule triggered. It is never a medical clearance statement.</p>
+                    @if ($hasInsufficientData)
+                        <p class="mb-2"><span class="oc-badge oc-badge-review"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Insufficient data</span></p>
+                        <p class="small text-secondary mb-0">Recent data is missing or stale, so one or more implemented rules could not be evaluated. This is not a medical assessment.</p>
+                    @else
+                        <p class="mb-2"><span class="oc-badge oc-badge-ok"><i class="bi bi-check-circle" aria-hidden="true"></i> No flag</span></p>
+                        <p class="small text-secondary mb-0">“No flag” only means no implemented rule triggered and the available data was sufficient. It is never a medical clearance statement.</p>
+                    @endif
                 @endforelse
                 <a href="{{ route('alerts.index') }}" class="btn btn-outline-secondary btn-sm mt-2">View alert history</a>
             </div>

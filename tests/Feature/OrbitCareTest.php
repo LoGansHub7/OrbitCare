@@ -11,6 +11,7 @@ use App\Models\Mission;
 use App\Models\User;
 use App\Services\AlertEvaluationService;
 use Database\Seeders\AlertRuleSeeder;
+use Database\Seeders\DemoSeeder;
 use Database\Seeders\MetricDefinitionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -63,6 +64,21 @@ class OrbitCareTest extends TestCase
         return Alert::where('crew_profile_id', $crew->id)->firstOrFail();
     }
 
+    private function recordHeartRate(User $user, float $value, array $dayOffsets = [2, 1, 0]): void
+    {
+        $metricId = MetricDefinition::where('code', 'resting_heart_rate')->value('id');
+
+        foreach ($dayOffsets as $offset) {
+            HealthReading::create([
+                'crew_profile_id' => $user->crewProfile->id,
+                'metric_definition_id' => $metricId,
+                'value' => $value,
+                'observed_at' => today()->subDays($offset)->setTime(8, 0),
+                'source' => 'manual',
+            ]);
+        }
+    }
+
     public function test_guests_are_redirected_to_login(): void
     {
         $this->get('/dashboard')->assertRedirect('/login');
@@ -88,6 +104,15 @@ class OrbitCareTest extends TestCase
         $this->assertDatabaseCount('daily_checkins', 1);
         $this->assertDatabaseHas('daily_checkins', ['fatigue_rating' => 4]);
         $this->assertDatabaseHas('audit_events', ['action' => 'checkin.corrected']);
+    }
+
+    public function test_checkin_source_cannot_be_spoofed_by_the_client(): void
+    {
+        $this->actingAs($this->astronaut())
+            ->post('/check-in', $this->checkinPayload(['source' => 'simulation']))
+            ->assertRedirect('/dashboard');
+
+        $this->assertDatabaseHas('daily_checkins', ['source' => 'manual']);
     }
 
     public function test_invalid_checkin_is_rejected(): void
@@ -121,8 +146,9 @@ class OrbitCareTest extends TestCase
         $this->actingAs($user)->post('/readings', [
             'metric_code' => 'body_temperature', 'value' => 36.8,
             'observed_at' => now()->subMinute()->format('Y-m-d\TH:i'),
+            'source' => 'simulation',
         ])->assertRedirect(route('readings.index', ['metric' => 'body_temperature']));
-        $this->assertDatabaseHas('health_readings', ['value' => 36.8]);
+        $this->assertDatabaseHas('health_readings', ['value' => 36.8, 'source' => 'manual']);
     }
 
     public function test_astronaut_cannot_see_another_astronauts_readings(): void
@@ -159,7 +185,123 @@ class OrbitCareTest extends TestCase
         app(AlertEvaluationService::class)->evaluateCrew($crew);
 
         $this->assertDatabaseHas('alerts', ['crew_profile_id' => $crew->id, 'status' => 'open']);
-        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('Review');
+        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('Recent sleep and fatigue trend warrants review.');
+    }
+
+    public function test_dashboard_shows_amber_when_recent_data_is_insufficient(): void
+    {
+        $user = $this->astronaut();
+        $crew = $user->crewProfile;
+
+        foreach ([6, 5, 4] as $offset) {
+            DailyCheckin::create([
+                'crew_profile_id' => $crew->id,
+                'mission_date' => today()->subDays($offset)->toDateString(),
+                'sleep_hours' => 7.5,
+                'sleep_quality' => 4,
+                'fatigue_rating' => 2,
+                'exercise_minutes' => 40,
+                'source' => 'manual',
+                'submitted_at' => now()->subDays($offset),
+            ]);
+        }
+        $this->recordHeartRate($user, 55, [6, 5, 4]);
+
+        $this->assertSame([
+            'sleep_fatigue_review' => 'insufficient_data',
+            'resting_heart_rate_change' => 'insufficient_data',
+        ], app(AlertEvaluationService::class)->currentStates($crew));
+
+        $this->actingAs($user)->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Insufficient data')
+            ->assertDontSee('No flag');
+        $this->assertDatabaseCount('alerts', 0);
+    }
+
+    public function test_dashboard_shows_no_flag_when_recent_rules_are_clear(): void
+    {
+        $user = $this->astronaut();
+        $crew = $user->crewProfile;
+
+        foreach ([2, 1, 0] as $offset) {
+            DailyCheckin::create([
+                'crew_profile_id' => $crew->id,
+                'mission_date' => today()->subDays($offset)->toDateString(),
+                'sleep_hours' => 7.5,
+                'sleep_quality' => 4,
+                'fatigue_rating' => 2,
+                'exercise_minutes' => 40,
+                'source' => 'manual',
+                'submitted_at' => now()->subDays($offset),
+            ]);
+        }
+        $this->recordHeartRate($user, 55);
+
+        $this->assertSame([
+            'sleep_fatigue_review' => 'clear',
+            'resting_heart_rate_change' => 'clear',
+        ], app(AlertEvaluationService::class)->currentStates($crew));
+
+        $this->actingAs($user)->get('/dashboard')
+            ->assertOk()
+            ->assertSee('No flag')
+            ->assertDontSee('Insufficient data');
+    }
+
+    public function test_seeded_stable_and_stale_crew_have_distinct_dashboard_states(): void
+    {
+        $this->seed(DemoSeeder::class);
+
+        $this->actingAs(User::where('email', 'astro1@orbitcare.test')->firstOrFail())
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('No flag')
+            ->assertDontSee('Insufficient data');
+
+        $this->actingAs(User::where('email', 'astro3@orbitcare.test')->firstOrFail())
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Insufficient data');
+    }
+
+    public function test_heart_rate_rule_triggers_at_the_exact_threshold_boundary(): void
+    {
+        $user = $this->astronaut();
+        $this->recordHeartRate($user, 66);
+
+        app(AlertEvaluationService::class)->evaluateCrew($user->crewProfile);
+
+        $this->assertDatabaseHas('alerts', [
+            'crew_profile_id' => $user->crewProfile->id,
+            'summary' => 'Resting heart rate has risen above the baseline trend.',
+        ]);
+        $alert = Alert::where('crew_profile_id', $user->crewProfile->id)->firstOrFail();
+        $this->assertEquals(8.0, $alert->evidence['delta_bpm']);
+        $this->assertSame('triggered', app(AlertEvaluationService::class)->currentStates($user->crewProfile)['resting_heart_rate_change']);
+    }
+
+    public function test_heart_rate_rule_is_clear_below_the_threshold(): void
+    {
+        $user = $this->astronaut();
+        $this->recordHeartRate($user, 65.9);
+
+        app(AlertEvaluationService::class)->evaluateCrew($user->crewProfile);
+
+        $this->assertSame('clear', app(AlertEvaluationService::class)->currentStates($user->crewProfile)['resting_heart_rate_change']);
+        $this->assertDatabaseCount('alerts', 0);
+    }
+
+    public function test_repeated_alert_evaluation_does_not_create_duplicates(): void
+    {
+        $user = $this->astronaut();
+        $this->recordHeartRate($user, 66);
+        $service = app(AlertEvaluationService::class);
+
+        $service->evaluateCrew($user->crewProfile);
+        $service->evaluateCrew($user->crewProfile);
+
+        $this->assertDatabaseCount('alerts', 1);
     }
 
     public function test_alert_workflow_requires_sequential_review_and_closing_note(): void
@@ -175,8 +317,13 @@ class OrbitCareTest extends TestCase
             ->post(route('alerts.update', ['alertId' => $alert->id]), ['action' => 'acknowledge'])
             ->assertRedirect(route('alerts.show', ['alertId' => $alert->id]));
         $this->assertDatabaseHas('alerts', ['id' => $alert->id, 'status' => 'acknowledged']);
+        $alert->update(['evidence' => ['original_evidence' => 'preserve']]);
+        $snapshotCount = $alert->evidenceSnapshots()->count();
         app(AlertEvaluationService::class)->evaluateCrew($user->crewProfile()->firstOrFail());
         $this->assertDatabaseHas('alerts', ['id' => $alert->id, 'status' => 'acknowledged']);
+        $this->assertSame(['original_evidence' => 'preserve'], $alert->fresh()->evidence);
+        $this->assertSame($snapshotCount, $alert->evidenceSnapshots()->count());
+        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('acknowledged');
 
         $this->actingAs($user)
             ->post(route('alerts.update', ['alertId' => $alert->id]), ['action' => 'start_review'])
@@ -184,6 +331,7 @@ class OrbitCareTest extends TestCase
         $this->assertDatabaseHas('alerts', ['id' => $alert->id, 'status' => 'under_review']);
         app(AlertEvaluationService::class)->evaluateCrew($user->crewProfile()->firstOrFail());
         $this->assertDatabaseHas('alerts', ['id' => $alert->id, 'status' => 'under_review']);
+        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('under review');
 
         $this->actingAs($user)
             ->post(route('alerts.update', ['alertId' => $alert->id]), ['action' => 'close'])

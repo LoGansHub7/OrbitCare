@@ -39,3 +39,9 @@ OrbitCare currently imports **no external research dataset**. The demonstration 
 - `no_flag` means **no implemented rule triggered**, not that a person is medically healthy.
 - `insufficient_data` means the application cannot evaluate its implemented rule, not that no risk exists.
 - Research citations should be shown with their direct links and an explicit limitation near any product claim they inform.
+
+## Current experimental rule assumptions
+
+- The sleep/fatigue rule uses a personal baseline: it triggers only when the mean sleep duration across the latest three calendar days is at least 1 hour below that crew member's baseline **and** mean fatigue is at least 1 point above baseline. The heart-rate rule also compares a three-calendar-day mean with an individual baseline.
+- Each rule evaluates only data dated within the latest three calendar days and reports `insufficient_data` when that window lacks enough recent samples (or its data is stale). Older rows do not substitute for missing recent observations.
+- These windows and thresholds are product assumptions for a prototype, not values established by the sources above or validated for medical use.

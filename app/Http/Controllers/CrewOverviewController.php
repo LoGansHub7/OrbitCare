@@ -31,7 +31,10 @@ class CrewOverviewController extends Controller
                         ->latest('observed_at')
                         ->first()
                     : null;
-                $activeAlerts = $crew->alerts()->whereIn('status', ['open', 'acknowledged', 'under_review'])->count();
+                $activeAlerts = $crew->alerts()
+                    ->where('status', '!=', 'closed')
+                    ->where('severity', '!=', 'insufficient_data')
+                    ->count();
                 $hasCheckin = $latestCheckin !== null;
                 $hasReading = $latestReading !== null;
                 $isStale = ($latestCheckin && $latestCheckin->submitted_at->lt(now()->subHours(36)))

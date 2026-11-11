@@ -36,8 +36,8 @@ class DemoSeeder extends Seeder
 
         // code, name, email, scenario, days since the most recent data point
         $crew = [
-            ['OC-01', 'Amara Banda', 'astro1@orbitcare.test', 'stable', 1],
-            ['OC-02', 'Tendai Moyo', 'astro2@orbitcare.test', 'declining', 1],
+            ['OC-01', 'Amara Banda', 'astro1@orbitcare.test', 'stable', 0],
+            ['OC-02', 'Tendai Moyo', 'astro2@orbitcare.test', 'declining', 0],
             ['OC-03', 'Lindiwe Phiri', 'astro3@orbitcare.test', 'stale', 6],
         ];
 

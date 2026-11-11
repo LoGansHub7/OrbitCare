@@ -40,10 +40,9 @@ class CheckinController extends Controller
             'symptom_tags' => ['nullable', 'array'],
             'symptom_tags.*' => ['string', 'in:headache,nausea,congestion,skin_irritation,vision_change,back_pain'],
             'symptom_notes' => ['nullable', 'string', 'max:1000'],
-            'source' => ['sometimes', 'string', 'in:manual,csv_import,simulation'],
         ]);
 
-        $data['source'] = $data['source'] ?? 'manual';
+        $data['source'] = 'manual';
 
         $date = today()->toDateString();
 

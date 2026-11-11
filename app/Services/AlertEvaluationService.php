@@ -12,23 +12,21 @@ class AlertEvaluationService
 {
     public function evaluateAll(): void
     {
-        CrewProfile::query()->with(['checkins', 'readings'])->get()->each(function (CrewProfile $crew): void {
+        CrewProfile::query()->get()->each(function (CrewProfile $crew): void {
             $this->evaluateCrew($crew);
         });
     }
 
     public function evaluateCrew(CrewProfile $crew): void
     {
-        AlertRule::query()->where('is_active', true)->get()->each(function (AlertRule $rule) use ($crew): void {
-            $result = $this->evaluateRule($crew, $rule);
-
-            if ($result === null) {
-                return;
+        foreach ($this->evaluateRulesForCrew($crew) as $result) {
+            if ($result['state'] !== 'triggered') {
+                continue;
             }
 
             $existing = Alert::query()
                 ->where('crew_profile_id', $crew->id)
-                ->where('alert_rule_id', $rule->id)
+                ->where('alert_rule_id', $result['rule']->id)
                 ->latest('last_evaluated_at')
                 ->first();
 
@@ -37,37 +35,57 @@ class AlertEvaluationService
             }
 
             if ($existing) {
-                $existing->update([
-                    'status' => $existing->status,
-                    'severity' => $result['severity'],
-                    'summary' => $result['summary'],
-                    'explanation' => $result['explanation'],
-                    'evidence' => $result['evidence'],
-                    'last_evaluated_at' => now(),
-                    'acknowledged_at' => $existing->acknowledged_at ?? $result['acknowledged_at'],
-                    'closed_at' => $existing->closed_at ?? $result['closed_at'],
-                ]);
+                $updates = ['last_evaluated_at' => now()];
+                if ($existing->status === 'open') {
+                    $updates += [
+                        'severity' => $result['severity'],
+                        'summary' => $result['summary'],
+                        'explanation' => $result['explanation'],
+                        'evidence' => $result['evidence'],
+                    ];
+                }
+                $existing->update($updates);
 
-                $existing->evidenceSnapshots()->create(['snapshot' => $result['evidence']]);
+                if ($existing->status === 'open') {
+                    $existing->evidenceSnapshots()->create(['snapshot' => $result['evidence']]);
+                }
 
-                return;
+                continue;
             }
 
             $alert = Alert::query()->create([
                 'crew_profile_id' => $crew->id,
-                'alert_rule_id' => $rule->id,
-                'status' => $result['status'],
+                'alert_rule_id' => $result['rule']->id,
+                'status' => 'open',
                 'severity' => $result['severity'],
                 'summary' => $result['summary'],
                 'explanation' => $result['explanation'],
                 'evidence' => $result['evidence'],
                 'first_detected_at' => now(),
                 'last_evaluated_at' => now(),
-                'acknowledged_at' => $result['acknowledged_at'],
-                'closed_at' => $result['closed_at'],
             ]);
             $alert->evidenceSnapshots()->create(['snapshot' => $result['evidence']]);
-        });
+        }
+    }
+
+    public function currentStates(CrewProfile $crew): array
+    {
+        return collect($this->evaluateRulesForCrew($crew))
+            ->mapWithKeys(fn (array $result, string $code) => [$code => $result['state']])
+            ->all();
+    }
+
+    private function evaluateRulesForCrew(CrewProfile $crew): array
+    {
+        return AlertRule::query()
+            ->where('is_active', true)
+            ->get()
+            ->mapWithKeys(function (AlertRule $rule) use ($crew): array {
+                $result = $this->evaluateRule($crew, $rule);
+
+                return $result === null ? [] : [$rule->code => $result + ['rule' => $rule]];
+            })
+            ->all();
     }
 
     private function evaluateRule(CrewProfile $crew, AlertRule $rule): ?array
@@ -79,42 +97,49 @@ class AlertEvaluationService
         };
     }
 
-    private function evaluateSleepFatigueRule(CrewProfile $crew, AlertRule $rule): ?array
+    private function evaluateSleepFatigueRule(CrewProfile $crew, AlertRule $rule): array
     {
+        $windowStart = today()->subDays(2);
+        $windowEnd = today();
         $checkins = $crew->checkins()
+            ->whereDate('mission_date', '>=', $windowStart->toDateString())
+            ->whereDate('mission_date', '<=', $windowEnd->toDateString())
             ->orderBy('mission_date', 'desc')
-            ->take(7)
             ->get();
 
         if ($checkins->count() < ($rule->parameters['min_samples'] ?? 3) || $checkins->first()?->submitted_at->lt(now()->subHours(36))) {
-            return $this->insufficient($rule, 'Sleep and fatigue cannot be evaluated because the available check-in data is insufficient or stale.', ['sample_count' => $checkins->count()]);
+            return $this->insufficient($rule, 'Sleep and fatigue cannot be evaluated because the available check-in data is insufficient or stale.', [
+                'sample_count' => $checkins->count(),
+                'window_start' => $windowStart->toDateString(),
+                'window_end' => $windowEnd->toDateString(),
+            ]);
         }
 
         $sleepBaseline = $this->baselineFor($crew, 'sleep_duration');
         $fatigueBaseline = $this->baselineFor($crew, 'fatigue_rating');
-        $recentWindow = $checkins->take(3);
-        $avgSleep = round((float) $recentWindow->avg('sleep_hours'), 2);
-        $avgFatigue = round((float) $recentWindow->avg('fatigue_rating'), 2);
-        $sleepDelta = (float) ($rule->parameters['sleep_delta_hours'] ?? 1.5);
+        $avgSleep = round((float) $checkins->avg('sleep_hours'), 2);
+        $avgFatigue = round((float) $checkins->avg('fatigue_rating'), 2);
+        $sleepDelta = (float) ($rule->parameters['sleep_delta_hours'] ?? 1.0);
         $fatigueDelta = (float) ($rule->parameters['fatigue_delta'] ?? 1.0);
 
         $triggered = $avgSleep <= ($sleepBaseline - $sleepDelta)
             && $avgFatigue >= ($fatigueBaseline + $fatigueDelta);
 
         if (! $triggered) {
-            return null;
+            return ['state' => 'clear'];
         }
 
         return [
-            'status' => 'open',
+            'state' => 'triggered',
             'severity' => $avgFatigue >= 4 && $checkins->take(5)->count() >= 5 ? 'priority_review' : 'review',
             'summary' => 'Recent sleep and fatigue trend warrants review.',
             'explanation' => sprintf(
-                'Your sleep averaged %.1f hours over the last 3 days versus a baseline of %.1f hours, while fatigue averaged %.1f versus %.1f. This is an experimental rule (v%s), not a diagnosis.',
+                'Your sleep averaged %.1f hours over the last 3 days versus a baseline of %.1f hours, while fatigue averaged %.1f versus a baseline of %.1f. This is an experimental rule (v%s), not a diagnosis.',
                 $avgSleep,
-                $avgFatigue,
                 $sleepBaseline,
-                $fatigueBaseline, $rule->version,
+                $avgFatigue,
+                $fatigueBaseline,
+                $rule->version,
             ),
             'evidence' => [
                 'window_days' => 3,
@@ -122,47 +147,56 @@ class AlertEvaluationService
                 'avg_fatigue_score' => $avgFatigue,
                 'baseline_sleep_hours' => $sleepBaseline,
                 'baseline_fatigue_score' => $fatigueBaseline,
-                'sample_count' => $recentWindow->count(),
+                'sample_count' => $checkins->count(),
+                'window_start' => $windowStart->toDateString(),
+                'window_end' => $windowEnd->toDateString(),
             ],
-            'acknowledged_at' => null,
-            'closed_at' => null,
         ];
     }
 
-    private function evaluateHeartRateRule(CrewProfile $crew, AlertRule $rule): ?array
+    private function evaluateHeartRateRule(CrewProfile $crew, AlertRule $rule): array
     {
         $def = MetricDefinition::query()->where('code', 'resting_heart_rate')->first();
 
         if (! $def) {
-            return null;
+            return ['state' => 'insufficient_data'];
         }
 
+        $windowStart = today()->subDays(2);
+        $windowEnd = today();
         $readings = $crew->readings()
             ->where('metric_definition_id', $def->id)
+            ->whereBetween('observed_at', [$windowStart->copy()->startOfDay(), $windowEnd->copy()->endOfDay()])
             ->orderBy('observed_at', 'desc')
-            ->take(7)
             ->get();
+        $dailyAverages = $readings
+            ->groupBy(fn ($reading) => $reading->observed_at->toDateString())
+            ->map(fn ($day) => (float) $day->avg('value'));
 
-        if ($readings->count() < ($rule->parameters['min_samples'] ?? 3) || $readings->first()?->observed_at->lt(now()->subHours($def->freshness_hours))) {
-            return $this->insufficient($rule, 'Resting heart rate cannot be evaluated because the available readings are insufficient or stale.', ['sample_count' => $readings->count()]);
+        if ($dailyAverages->count() < ($rule->parameters['min_samples'] ?? 3) || $readings->first()?->observed_at->lt(now()->subHours($def->freshness_hours))) {
+            return $this->insufficient($rule, 'Resting heart rate cannot be evaluated because the available readings are insufficient or stale.', [
+                'sample_count' => $dailyAverages->count(),
+                'window_start' => $windowStart->toDateString(),
+                'window_end' => $windowEnd->toDateString(),
+            ]);
         }
 
         $baseline = $this->baselineFor($crew, 'resting_heart_rate');
-        $avg = round((float) $readings->take(3)->avg('value'), 2);
+        $avg = round((float) $dailyAverages->avg(), 2);
         $threshold = (float) ($rule->parameters['delta_bpm'] ?? 8.0);
 
         $triggered = $avg >= ($baseline + $threshold);
 
         if (! $triggered) {
-            return null;
+            return ['state' => 'clear'];
         }
 
         return [
-            'status' => 'open',
+            'state' => 'triggered',
             'severity' => $avg >= ($baseline + 15) ? 'priority_review' : 'review',
             'summary' => 'Resting heart rate has risen above the baseline trend.',
             'explanation' => sprintf(
-                'The latest three-day average resting heart rate is %.1f bpm, which is %.1f bpm above the individual baseline of %.1f bpm. This is an experimental alert and not a medical diagnosis.',
+                'The three-day average resting heart rate is %.1f bpm, which is %.1f bpm above the individual baseline of %.1f bpm. This is an experimental alert and not a medical diagnosis.',
                 $avg,
                 max(0, $avg - $baseline),
                 $baseline,
@@ -172,9 +206,10 @@ class AlertEvaluationService
                 'avg_resting_heart_rate_bpm' => $avg,
                 'baseline_resting_heart_rate_bpm' => $baseline,
                 'delta_bpm' => round($avg - $baseline, 2),
+                'sample_count' => $dailyAverages->count(),
+                'window_start' => $windowStart->toDateString(),
+                'window_end' => $windowEnd->toDateString(),
             ],
-            'acknowledged_at' => null,
-            'closed_at' => null,
         ];
     }
 
@@ -205,6 +240,11 @@ class AlertEvaluationService
 
     private function insufficient(AlertRule $rule, string $explanation, array $evidence): array
     {
-        return ['status' => 'open', 'severity' => 'insufficient_data', 'summary' => 'Insufficient data for experimental evaluation.', 'explanation' => $explanation, 'evidence' => $evidence + ['rule_version' => $rule->version], 'acknowledged_at' => null, 'closed_at' => null];
+        return [
+            'state' => 'insufficient_data',
+            'summary' => 'Insufficient data for experimental evaluation.',
+            'explanation' => $explanation,
+            'evidence' => $evidence + ['rule_version' => $rule->version],
+        ];
     }
 }
