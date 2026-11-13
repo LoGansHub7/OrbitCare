@@ -10,6 +10,11 @@ use App\Http\Controllers\ReadingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DemoController;
 use App\Http\Controllers\HazardDashboardController;
+use App\Http\Controllers\RadiationMonitorController;
+use App\Http\Controllers\WellbeingMonitorController;
+use App\Http\Controllers\AutonomyMonitorController;
+use App\Http\Controllers\PhysicalMonitorController;
+use App\Http\Controllers\EnvironmentMonitorController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -71,6 +76,16 @@ Route::middleware('auth')->group(function () {
     Route::middleware(EnsureRole::class.':astronaut')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::get('/hazards', [HazardDashboardController::class, 'index'])->name('hazards.index');
+        
+        // Phase C: Hazard Monitoring Pages
+        Route::prefix('monitor')->name('monitor.')->group(function () {
+            Route::get('/radiation', [RadiationMonitorController::class, 'index'])->name('radiation');
+            Route::get('/wellbeing', [WellbeingMonitorController::class, 'index'])->name('wellbeing');
+            Route::get('/autonomy', [AutonomyMonitorController::class, 'index'])->name('autonomy');
+            Route::get('/physical', [PhysicalMonitorController::class, 'index'])->name('physical');
+            Route::get('/environment', [EnvironmentMonitorController::class, 'index'])->name('environment');
+        });
+        
         Route::get('/reports', [ReportController::class, 'showSelf'])->name('reports.self');
         Route::get('/exports/my-health-data.csv', [ReportController::class, 'exportSelf'])->name('exports.self');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
