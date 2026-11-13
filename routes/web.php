@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReadingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DemoController;
+use App\Http\Controllers\HazardDashboardController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +70,7 @@ Route::middleware('auth')->group(function () {
     // Astronaut area: every query is scoped to the signed-in user's own crew profile
     Route::middleware(EnsureRole::class.':astronaut')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
+        Route::get('/hazards', [HazardDashboardController::class, 'index'])->name('hazards.index');
         Route::get('/reports', [ReportController::class, 'showSelf'])->name('reports.self');
         Route::get('/exports/my-health-data.csv', [ReportController::class, 'exportSelf'])->name('exports.self');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
