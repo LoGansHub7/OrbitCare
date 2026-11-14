@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\AuditEvent;
 use App\Models\FollowUp;
 use App\Models\EarthSyncPackage;
+use App\Models\Hazard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -15,13 +16,17 @@ class AlertController extends Controller
     public function index(Request $request)
     {
         $crew = $request->user()->crewProfile()->firstOrFail();
+        $hazardSlug = $request->query('hazard');
         $alerts = $crew->alerts()
-            ->with('rule')
+            ->with('rule.hazard')
+            ->when($hazardSlug, fn ($query) => $query->whereHas('rule.hazard', fn ($q) => $q->where('slug', $hazardSlug)))
             ->orderByRaw("CASE WHEN status = 'closed' THEN 1 ELSE 0 END")
             ->orderByDesc('last_evaluated_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
+        $hazards = Hazard::orderBy('sort_order')->get(['slug', 'name']);
 
-        return view('alerts.index', compact('alerts'));
+        return view('alerts.index', compact('alerts', 'hazards', 'hazardSlug'));
     }
 
     public function show(Request $request, int $alertId)

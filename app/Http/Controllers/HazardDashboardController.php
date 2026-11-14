@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Hazard;
 use App\Models\Mission;
-use App\Models\CrewProfile;
+use App\Services\AlertEvaluationService;
 use Illuminate\View\View;
 
 class HazardDashboardController extends Controller
 {
+    public function __construct(private readonly AlertEvaluationService $alerts)
+    {
+    }
+
     /**
      * Show hazard-centered dashboard for authenticated crew.
      */
@@ -27,13 +31,14 @@ class HazardDashboardController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        // Calculate hazard status for this crew member
+        $statuses = $crewProfile ? $this->alerts->hazardStatuses($crewProfile) : [];
+
         $hazardStatus = [];
         foreach ($hazards as $hazard) {
             $hazardStatus[$hazard->slug] = [
                 'hazard' => $hazard,
-                'status' => $this->calculateHazardStatus($hazard, $crewProfile),
-                'alert_count' => $this->getAlertCount($hazard, $crewProfile),
+                'status' => $statuses[$hazard->id]['status'] ?? 'insufficient_data',
+                'alert_count' => $statuses[$hazard->id]['alert_count'] ?? 0,
                 'weight' => $mission?->hazardWeights()[$hazard->slug] ?? 1.0,
             ];
         }
@@ -48,34 +53,6 @@ class HazardDashboardController extends Controller
             'hazardStatus' => $hazardStatus,
             'missionProfiles' => $missionProfiles,
         ]);
-    }
-
-    /**
-     * Calculate status for a specific hazard.
-     * Returns: 'no_flag', 'review', 'priority_review', 'insufficient_data'
-     */
-    protected function calculateHazardStatus(Hazard $hazard, ?CrewProfile $crewProfile): string
-    {
-        if (!$crewProfile) {
-            return 'insufficient_data';
-        }
-
-        // TODO: Integrate with AlertRule evaluation
-        // For now, return 'no_flag' as placeholder
-        return 'no_flag';
-    }
-
-    /**
-     * Count active alerts for a hazard.
-     */
-    protected function getAlertCount(Hazard $hazard, ?CrewProfile $crewProfile): int
-    {
-        if (!$crewProfile) {
-            return 0;
-        }
-
-        // TODO: Query Alert model by hazard_id and crew_profile_id
-        return 0;
     }
 
     /**

@@ -7,6 +7,13 @@
         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left" aria-hidden="true"></i> Dashboard</a>
     </div>
 
+    <nav class="d-flex flex-wrap gap-2 mb-3" aria-label="Filter alerts by hazard">
+        <a href="{{ route('alerts.index') }}" class="btn btn-sm {{ $hazardSlug ? 'btn-outline-secondary' : 'btn-secondary' }}">All hazards</a>
+        @foreach ($hazards as $hazard)
+            <a href="{{ route('alerts.index', ['hazard' => $hazard->slug]) }}" class="btn btn-sm {{ $hazardSlug === $hazard->slug ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ $hazard->name }}</a>
+        @endforeach
+    </nav>
+
     <div class="oc-card">
         @if ($alerts->isEmpty())
             <div class="text-center py-5">
@@ -42,7 +49,9 @@
                                 <div class="fw-semibold">{{ $alert->summary }}</div>
                                 <div class="small text-secondary">{{ ucfirst(str_replace('_', ' ', $alert->severity)) }}</div>
                             </td>
-                            <td>{{ $alert->rule?->code ?? 'Experimental rule' }} <span class="text-secondary">({{ $alert->rule?->version ?? 'unknown version' }})</span></td>
+                            <td>{{ $alert->rule?->code ?? 'Experimental rule' }} <span class="text-secondary">({{ $alert->rule?->version ?? 'unknown version' }})</span>
+                                @if ($alert->rule?->hazard)<div class="small text-secondary">{{ $alert->rule->hazard->name }}</div>@endif
+                            </td>
                             <td><span class="text-capitalize">{{ str_replace('_', ' ', $alert->status) }}</span></td>
                             <td>{{ $alert->last_evaluated_at?->format('M j, Y H:i') ?? '—' }}</td>
                             <td><a href="{{ route('alerts.show', ['alertId' => $alert->id]) }}" class="btn btn-sm btn-outline-primary">View details</a></td>

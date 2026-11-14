@@ -109,9 +109,21 @@
                         </div>
 
                         <!-- Link to Hazard Details -->
-                        <a href="{{ route('hazards.show', $hazard->slug) }}" class="btn btn-sm btn-outline-primary w-100">
-                            View Details
-                        </a>
+                        @php
+                            $monitorRoutes = [
+                                'radiation' => 'monitor.radiation',
+                                'isolation' => 'monitor.wellbeing',
+                                'distance' => 'monitor.autonomy',
+                                'gravity' => 'monitor.physical',
+                                'environment' => 'monitor.environment',
+                            ];
+                        @endphp
+                        <div class="d-flex gap-2">
+                            @isset($monitorRoutes[$hazard->slug])
+                                <a href="{{ route($monitorRoutes[$hazard->slug]) }}" class="btn btn-sm btn-outline-primary flex-fill">Open monitor</a>
+                            @endisset
+                            <a href="{{ route('alerts.index', ['hazard' => $hazard->slug]) }}" class="btn btn-sm btn-outline-secondary flex-fill">Alerts</a>
+                        </div>
                     </div>
                 </div>
             </div>

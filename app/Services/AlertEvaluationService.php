@@ -10,6 +10,8 @@ use App\Models\MetricDefinition;
 
 class AlertEvaluationService
 {
+    public function __construct(private readonly HazardRuleEvaluator $hazardRules = new HazardRuleEvaluator) {}
+
     public function evaluateAll(): void
     {
         CrewProfile::query()->get()->each(function (CrewProfile $crew): void {
@@ -68,9 +70,10 @@ class AlertEvaluationService
         }
     }
 
-    public function currentStates(CrewProfile $crew): array
+    public function currentStates(CrewProfile $crew, bool $includeHazardRules = false): array
     {
         return collect($this->evaluateRulesForCrew($crew))
+            ->when(! $includeHazardRules, fn ($results) => $results->reject(fn (array $result, string $code) => $this->hazardRules->supports($code)))
             ->mapWithKeys(fn (array $result, string $code) => [$code => $result['state']])
             ->all();
     }
@@ -93,8 +96,43 @@ class AlertEvaluationService
         return match ($rule->code) {
             'sleep_fatigue_review' => $this->evaluateSleepFatigueRule($crew, $rule),
             'resting_heart_rate_change' => $this->evaluateHeartRateRule($crew, $rule),
-            default => null,
+            default => $this->hazardRules->supports($rule->code) ? $this->hazardRules->evaluate($crew, $rule) : null,
         };
+    }
+
+    /**
+     * Per-hazard status for the dashboard: priority_review > review > insufficient_data > no_flag.
+     * Unresolved alerts keep a hazard flagged even when current numbers have recovered.
+     *
+     * @return array<string, array{status: string, alert_count: int}> keyed by hazard id
+     */
+    public function hazardStatuses(CrewProfile $crew): array
+    {
+        $rules = AlertRule::query()->where('is_active', true)->whereNotNull('hazard_id')->get();
+        $states = $this->currentStates($crew, true);
+        $open = $crew->alerts()
+            ->where('status', '!=', 'closed')
+            ->with('rule:id,hazard_id')
+            ->get()
+            ->filter(fn (Alert $alert) => $alert->rule?->hazard_id !== null)
+            ->groupBy(fn (Alert $alert) => $alert->rule->hazard_id);
+
+        $result = [];
+        foreach ($rules->groupBy('hazard_id') as $hazardId => $hazardRules) {
+            $alerts = $open->get($hazardId, collect());
+            $evaluated = $hazardRules->map(fn (AlertRule $rule) => $states[$rule->code] ?? 'insufficient_data');
+
+            $status = match (true) {
+                $alerts->contains('severity', 'priority_review') => 'priority_review',
+                $alerts->isNotEmpty() => 'review',
+                $evaluated->every(fn ($state) => $state === 'insufficient_data') => 'insufficient_data',
+                default => 'no_flag',
+            };
+
+            $result[$hazardId] = ['status' => $status, 'alert_count' => $alerts->count()];
+        }
+
+        return $result;
     }
 
     private function evaluateSleepFatigueRule(CrewProfile $crew, AlertRule $rule): array

@@ -23,6 +23,11 @@ class AlertRule extends Model
         return $this->belongsTo(MetricDefinition::class, 'metric_definition_id');
     }
 
+    public function hazard(): BelongsTo
+    {
+        return $this->belongsTo(Hazard::class);
+    }
+
     public function alerts(): HasMany
     {
         return $this->hasMany(Alert::class);

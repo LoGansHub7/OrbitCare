@@ -21,6 +21,11 @@ class Hazard extends Model
         return $this->hasMany(Risk::class)->orderBy('name');
     }
 
+    public function alertRules(): HasMany
+    {
+        return $this->hasMany(AlertRule::class);
+    }
+
     public function references(): HasMany
     {
         return $this->hasMany(Reference::class)->orderBy('published_at', 'desc');
