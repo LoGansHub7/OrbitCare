@@ -40,8 +40,10 @@ body { background: var(--oc-bg); color: var(--oc-text); }
 
 /* Shell */
 .oc-shell { display: flex; min-height: 100vh; }
-.oc-sidebar { width: 260px; background: var(--oc-navy); color: #CBD5E1; padding: 24px 16px; }
-.oc-sidebar-fixed { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+.oc-sidebar { width: 260px; background: var(--oc-navy); color: #CBD5E1; padding: 24px 16px; min-height: 100vh; }
+.oc-sidebar-fixed { position: sticky; top: 0; height: 100vh; flex-shrink: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
+.oc-sidebar-fixed::-webkit-scrollbar { width: 6px; }
+.oc-sidebar-fixed::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); border-radius: 4px; }
 .oc-brand { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; font-size: 1.25rem; padding: 0 12px 24px; }
 .oc-brand i { color: #60A5FA; }
 .oc-nav { display: flex; flex-direction: column; gap: 4px; }
