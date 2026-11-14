@@ -10,8 +10,10 @@ use App\Models\Mission;
 use App\Models\MissionEvent;
 use App\Services\AlertEvaluationService;
 use App\Services\DemoMode;
+use App\Services\HazardSimulator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Validation\Rule;
 use LogicException;
 
 class DemoController extends Controller
@@ -36,13 +38,18 @@ class DemoController extends Controller
         return redirect()->route('admin.demo')->with('status', 'The fictional demo data has been reset.');
     }
 
-    public function scenario(Request $request, AlertEvaluationService $alerts)
+    public function scenario(Request $request, AlertEvaluationService $alerts, HazardSimulator $hazards)
     {
         abort_unless(DemoMode::enabled(), 404);
-        $data = $request->validate(['scenario' => ['required', 'in:stable,sleep_fatigue,heart_rate_shift,stale,exercise_gap,radiation_event,earth_blackout']]);
+        $hazardScenarios = collect(array_keys(HazardSimulator::SCENARIOS))->map(fn ($code) => 'hazard_'.$code)->all();
+        $data = $request->validate(['scenario' => ['required', Rule::in(array_merge(['stable', 'sleep_fatigue', 'heart_rate_shift', 'stale', 'exercise_gap', 'radiation_event', 'earth_blackout'], $hazardScenarios))]]);
         $mission = Mission::query()->latest('starts_on')->firstOrFail();
         $crew = CrewProfile::query()->where('crew_code', $data['scenario'] === 'stale' ? 'OC-03' : 'OC-01')->firstOrFail();
 
+        if (in_array($data['scenario'], $hazardScenarios, true)) {
+            $hazards->apply($crew, substr($data['scenario'], strlen('hazard_')));
+            $alerts->evaluateCrew($crew);
+        }
         if ($data['scenario'] === 'sleep_fatigue') {
             $crew = CrewProfile::query()->where('crew_code', 'OC-02')->firstOrFail();
             foreach ([0, 1, 2] as $daysAgo) {
@@ -64,7 +71,9 @@ class DemoController extends Controller
             DailyCheckin::updateOrCreate(['crew_profile_id' => $crew->id, 'mission_date' => today()->toDateString()], ['sleep_hours' => 7.2, 'sleep_quality' => 4, 'fatigue_rating' => 2, 'exercise_minutes' => 5, 'planned_aerobic_minutes' => 45, 'completed_aerobic_minutes' => 5, 'source' => 'simulation', 'submitted_at' => now()]);
         }
         if ($data['scenario'] === 'radiation_event') {
-            MissionEvent::create(['mission_id' => $mission->id, 'name' => 'Simulated radiation event', 'occurred_at' => now(), 'notes' => 'Fictional demonstration event only; no radiation rule is implemented.']);
+            $hazards->apply($crew, 'radiation_event');
+            $alerts->evaluateCrew($crew);
+            MissionEvent::create(['mission_id' => $mission->id, 'name' => 'Simulated radiation event', 'occurred_at' => now(), 'notes' => 'Fictional demonstration event only; dose rates are simulated data.']);
         }
         if ($data['scenario'] === 'earth_blackout') {
             $mission->update(['earth_link_status' => 'offline', 'earth_link_delay_minutes' => null]);

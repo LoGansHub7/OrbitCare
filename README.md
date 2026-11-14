@@ -9,6 +9,7 @@ OrbitCare is a Laravel + MySQL prototype for astronauts to record health indicat
 - Explainable experimental alerts with evidence snapshots and follow-up history.
 - Assigned-crew review, printable summaries, and authorised CSV export.
 - Fictional, repeatable local demo scenarios and a protected reset.
+- NASA five-hazards layer: hazard dashboard, five monitors, hazard-linked alert rules, risk register, evidence library, hazard reports and CSV, and hazard simulation ([details](docs/hazard-framework.md)).
 
 All demonstration records are synthetic. NASA sources provide indicator context only; they do not validate thresholds, individual conclusions, or diagnoses.
 
@@ -32,6 +33,7 @@ php artisan test
 - [Deployment and rollback guide](docs/deployment.md)
 - [Presentation release checklist](docs/release-checklist.md)
 - [Research register and provenance](docs/research-register.md)
+- [Hazard framework, pages, rules and simulation](docs/hazard-framework.md)
 - [Team working agreement](docs/team-working-agreement.md)
 - [Development phases](phases.md)
 

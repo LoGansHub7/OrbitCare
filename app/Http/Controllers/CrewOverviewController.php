@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MetricDefinition;
+use App\Services\HazardReportService;
 use Illuminate\Http\Request;
 
 class CrewOverviewController extends Controller
@@ -83,6 +84,13 @@ class CrewOverviewController extends Controller
             ->orderByDesc('last_evaluated_at')
             ->get();
 
-        return view('staff.crew-show', compact('crew', 'heartRateDefinition', 'checkins', 'readings', 'alerts'));
+        return view('staff.crew-show', [
+            'crew' => $crew,
+            'heartRateDefinition' => $heartRateDefinition,
+            'checkins' => $checkins,
+            'readings' => $readings,
+            'alerts' => $alerts,
+            'hazardRows' => app(HazardReportService::class)->summary($crew),
+        ]);
     }
 }

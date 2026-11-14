@@ -10,6 +10,8 @@ use App\Http\Controllers\ReadingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DemoController;
 use App\Http\Controllers\HazardDashboardController;
+use App\Http\Controllers\HazardReportController;
+use App\Http\Controllers\RiskRegisterController;
 use App\Http\Controllers\RadiationMonitorController;
 use App\Http\Controllers\WellbeingMonitorController;
 use App\Http\Controllers\AutonomyMonitorController;
@@ -44,6 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/research', [ReportController::class, 'research'])->name('research.index');
     Route::get('/help', [ReportController::class, 'help'])->name('help.index');
     Route::get('/how-alerts-work', [ReportController::class, 'alertCatalog'])->name('alerts.catalog');
+    Route::get('/risks', [RiskRegisterController::class, 'risks'])->name('risks.index');
+    Route::get('/evidence', [RiskRegisterController::class, 'evidence'])->name('evidence.index');
 
     // Medical officer / admin area (built out in later phases)
     Route::middleware(EnsureRole::class.':medical_officer,admin')->group(function () {
@@ -70,6 +74,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/staff/crew/{crewProfileId}/health-data.csv', [ReportController::class, 'exportAssigned'])
             ->whereNumber('crewProfileId')
             ->name('exports.assigned');
+        Route::get('/staff/crew/{crewProfileId}/hazards', [HazardReportController::class, 'showAssigned'])
+            ->whereNumber('crewProfileId')
+            ->name('hazard-report.assigned');
+        Route::get('/staff/crew/{crewProfileId}/hazard-data.csv', [HazardReportController::class, 'exportAssigned'])
+            ->whereNumber('crewProfileId')
+            ->name('hazard-export.assigned');
     });
 
     // Astronaut area: every query is scoped to the signed-in user's own crew profile
@@ -87,6 +97,8 @@ Route::middleware('auth')->group(function () {
         });
         
         Route::get('/reports', [ReportController::class, 'showSelf'])->name('reports.self');
+        Route::get('/reports/hazards', [HazardReportController::class, 'showSelf'])->name('hazard-report.self');
+        Route::get('/exports/my-hazard-data.csv', [HazardReportController::class, 'exportSelf'])->name('hazard-export.self');
         Route::get('/exports/my-health-data.csv', [ReportController::class, 'exportSelf'])->name('exports.self');
         Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
         Route::get('/alerts/{alertId}', [AlertController::class, 'show'])->whereNumber('alertId')->name('alerts.show');

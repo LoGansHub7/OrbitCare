@@ -9,11 +9,24 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('reports.assigned', ['crewProfileId' => $crew->id]) }}" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Printable report</a>
+            <a href="{{ route('hazard-report.assigned', ['crewProfileId' => $crew->id]) }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-globe2" aria-hidden="true"></i> Hazard report</a>
             <a href="{{ route('staff.home') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left" aria-hidden="true"></i> Crew overview</a>
         </div>
     </div>
 
     <div class="alert alert-secondary" role="note">This page presents recorded data and experimental rules only. It is not a diagnosis or treatment recommendation.</div>
+
+    <section class="oc-card mb-3" aria-labelledby="staff-hazards-heading">
+        <h2 id="staff-hazards-heading" class="oc-card-title">Hazard status</h2>
+        <ul class="list-unstyled mb-0">
+            @foreach ($hazardRows as $row)
+                <li class="d-flex flex-wrap justify-content-between gap-2 border-bottom py-2">
+                    <span><strong>{{ $row['hazard']->name }}</strong> <span class="text-secondary small">{{ $row['latest'] }}</span></span>
+                    <span class="text-capitalize">{{ str_replace('_', ' ', $row['status']) }}@if ($row['alerts']->isNotEmpty()) · {{ $row['alerts']->count() }} open @endif</span>
+                </li>
+            @endforeach
+        </ul>
+    </section>
 
     <section class="oc-card mb-3" aria-labelledby="staff-alerts-heading">
         <h2 id="staff-alerts-heading" class="oc-card-title">Alert history</h2>

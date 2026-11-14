@@ -33,18 +33,21 @@ class HazardDashboardController extends Controller
 
         $statuses = $crewProfile ? $this->alerts->hazardStatuses($crewProfile) : [];
 
+        // What-if preview: ?profile= changes the weighting display only, never stored data or thresholds.
+        $missionProfiles = ['LEO', 'Moon', 'Mars'];
+        $requested = request()->query('profile');
+        $previewProfile = in_array($requested, $missionProfiles, true) ? $requested : null;
+        $weights = $previewProfile ? Mission::weightsForProfile($previewProfile) : ($mission?->hazardWeights() ?? []);
+
         $hazardStatus = [];
         foreach ($hazards as $hazard) {
             $hazardStatus[$hazard->slug] = [
                 'hazard' => $hazard,
                 'status' => $statuses[$hazard->id]['status'] ?? 'insufficient_data',
                 'alert_count' => $statuses[$hazard->id]['alert_count'] ?? 0,
-                'weight' => $mission?->hazardWeights()[$hazard->slug] ?? 1.0,
+                'weight' => $weights[$hazard->slug] ?? 1.0,
             ];
         }
-
-        // Prepare mission profile selector
-        $missionProfiles = ['LEO', 'Moon', 'Mars'];
 
         return view('hazards.index', [
             'crewProfile' => $crewProfile,
@@ -52,6 +55,7 @@ class HazardDashboardController extends Controller
             'hazards' => $hazards,
             'hazardStatus' => $hazardStatus,
             'missionProfiles' => $missionProfiles,
+            'previewProfile' => $previewProfile,
         ]);
     }
 

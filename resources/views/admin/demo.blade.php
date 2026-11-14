@@ -5,7 +5,7 @@
 <div class="alert alert-warning" role="note"><strong>Local demo mode.</strong> Every scenario creates fictional simulation data. Reset rebuilds only the configured local demo database.</div>
 <div class="row g-3">
  <div class="col-lg-7"><section class="oc-card h-100"><h2 class="oc-card-title">Scenario player</h2><p class="text-secondary">Run a scenario, then use the supplied crew link to inspect the evidence and response workflow.</p><div class="d-flex flex-wrap gap-2">
- @foreach (['stable' => 'Stable baseline', 'sleep_fatigue' => 'Sleep + fatigue trend', 'heart_rate_shift' => 'Heart-rate shift', 'stale' => 'Stale data', 'exercise_gap' => 'Exercise gap', 'radiation_event' => 'Radiation event', 'earth_blackout' => 'Earth-link blackout'] as $code => $label)
+ @foreach (['stable' => 'Stable baseline', 'sleep_fatigue' => 'Sleep + fatigue trend', 'heart_rate_shift' => 'Heart-rate shift', 'stale' => 'Stale data', 'exercise_gap' => 'Exercise gap', 'radiation_event' => 'Radiation event', 'earth_blackout' => 'Earth-link blackout', 'hazard_isolation_decline' => 'Mood decline (isolation)', 'hazard_comms_delay' => 'Comms-delay escalations', 'hazard_deconditioning' => 'Muscle deconditioning', 'hazard_cabin_co2' => 'High cabin CO2'] as $code => $label)
  <button class="btn btn-outline-primary btn-sm" data-demo-scenario="{{ $code }}">{{ $label }}</button>
  @endforeach
  </div><p id="scenario-result" class="small mt-3 mb-0" aria-live="polite"></p></section></div>

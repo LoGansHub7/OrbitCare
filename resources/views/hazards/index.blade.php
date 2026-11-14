@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', 'Hazards')
+@section('heading', 'Five hazards of spaceflight')
 
 @section('content')
 <div class="container-fluid py-4">
@@ -9,7 +11,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Mission Profile</h6>
                     @if($mission)
-                        <div class="alert alert-info mb-0">
+                        <div class="alert alert-info mb-2">
                             <small>
                                 <strong>{{ $mission->name }}</strong> • {{ $mission->mission_profile }}
                                 @if($mission->mission_profile === 'Mars')
@@ -24,6 +26,16 @@
                     @else
                         <small class="text-muted">No active mission</small>
                     @endif
+                    <form method="GET" class="d-flex gap-2 align-items-center">
+                        <label for="profile" class="small mb-0">What-if weighting:</label>
+                        <select id="profile" name="profile" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">Mission default</option>
+                            @foreach($missionProfiles as $profileOption)
+                                <option value="{{ $profileOption }}" @selected($previewProfile === $profileOption)>{{ $profileOption }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                    <small class="text-muted d-block mt-1">Weights are illustrative team assumptions. Previewing changes only this display, not alert thresholds or stored data.</small>
                 </div>
             </div>
         </div>
@@ -33,7 +45,7 @@
                     <h6 class="card-title">Crew Member</h6>
                     @if($crewProfile)
                         <small>
-                            <strong>{{ $crewProfile->name }}</strong><br>
+                            <strong>{{ $crewProfile->user->name }}</strong><br>
                             Crew Code: <code>{{ $crewProfile->crew_code }}</code>
                         </small>
                     @else

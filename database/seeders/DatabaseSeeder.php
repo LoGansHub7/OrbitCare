@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AlertRuleSeeder::class,
             DemoSeeder::class,
             DemoCareAssignmentSeeder::class,
+            HazardDemoSeeder::class,
         ]);
     }
 }

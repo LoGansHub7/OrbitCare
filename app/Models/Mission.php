@@ -33,8 +33,12 @@ class Mission extends Model
             return $this->hazard_weightings;
         }
 
-        $profile = $this->mission_profile ?? 'LEO';
+        return self::weightsForProfile($this->mission_profile ?? 'LEO');
+    }
 
+    /** Illustrative scenario multipliers (team assumptions), not NASA-published values. */
+    public static function weightsForProfile(string $profile): array
+    {
         return match ($profile) {
             'LEO' => [
                 'radiation' => 1.0,
