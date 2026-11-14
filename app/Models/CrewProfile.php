@@ -41,6 +41,11 @@ class CrewProfile extends Model
         return $this->hasMany(BaselineProfile::class);
     }
 
+    public function bodyRegionIncidents(): HasMany
+    {
+        return $this->hasMany(BodyRegionIncident::class);
+    }
+
     public function medicalOfficers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'care_assignments', 'crew_profile_id', 'medical_officer_id')

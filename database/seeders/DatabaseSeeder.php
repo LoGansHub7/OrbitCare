@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DemoSeeder::class,
             DemoCareAssignmentSeeder::class,
             HazardDemoSeeder::class,
+            BodyRegionSeeder::class,
         ]);
     }
 }

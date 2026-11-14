@@ -19,6 +19,7 @@ use App\Http\Controllers\WellbeingMonitorController;
 use App\Http\Controllers\AutonomyMonitorController;
 use App\Http\Controllers\PhysicalMonitorController;
 use App\Http\Controllers\EnvironmentMonitorController;
+use App\Http\Controllers\BodyMapController;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -116,5 +117,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/check-in', [CheckinController::class, 'store'])->name('checkin.store');
         Route::get('/readings', [ReadingController::class, 'index'])->name('readings.index');
         Route::post('/readings', [ReadingController::class, 'store'])->name('readings.store');
+
+        Route::get('/body-map', [BodyMapController::class, 'index'])->name('body-map.index');
+        Route::get('/api/body-map', [BodyMapController::class, 'all'])->name('body-map.api.all');
+        Route::get('/api/body-map/{slug}', [BodyMapController::class, 'show'])->name('body-map.api.show');
     });
 });

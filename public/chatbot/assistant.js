@@ -572,6 +572,15 @@
             flushQueue();
         }
 
+        // Public hook so other pages (e.g. Body Map) can open ORBIT with a prefilled question.
+        globalThis.OrbitAssistant = {
+            askAbout(text) {
+                if (mode === 'floating') setOpen(true);
+                if (el.input) el.input.value = text;
+                el.form?.requestSubmit();
+            },
+        };
+
         start();
     }
 

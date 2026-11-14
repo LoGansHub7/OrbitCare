@@ -30,4 +30,9 @@ class Hazard extends Model
     {
         return $this->hasMany(Reference::class)->orderBy('published_at', 'desc');
     }
+
+    public function bodyRegionHazards(): HasMany
+    {
+        return $this->hasMany(BodyRegionHazard::class);
+    }
 }

@@ -15,6 +15,7 @@
         <div class="small text-uppercase text-white-50 px-2 mt-3">Health</div>
         <a href="{{ route('checkin.create') }}" class="{{ request()->routeIs('checkin.*') ? 'active' : '' }}"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i> Daily check-in</a>
         <a href="{{ route('readings.index') }}" class="{{ request()->routeIs('readings.*') ? 'active' : '' }}"><i class="bi bi-heart-pulse" aria-hidden="true"></i> Readings</a>
+        <a href="{{ route('body-map.index') }}" class="{{ request()->routeIs('body-map.*') ? 'active' : '' }}"><i class="bi bi-person-standing" aria-hidden="true"></i> Body Map</a>
         <div class="small text-uppercase text-white-50 px-2 mt-3">Reports</div>
         <a href="{{ route('reports.self') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Reports</a>
         <a href="{{ route('hazard-report.self') }}" class="{{ request()->routeIs('hazard-report.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-bar-graph" aria-hidden="true"></i> Hazard report</a>
