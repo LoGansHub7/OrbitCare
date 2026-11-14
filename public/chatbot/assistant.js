@@ -506,8 +506,33 @@
         function speak(text) {
             if (!('speechSynthesis' in globalThis)) return;
             speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(String(text));
-            utterance.rate = 0.95;
+            const spokenText = String(text)
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/https?:\/\/\S+/gi, ' ')
+                .replace(/^\s*(?:[-*•]|\d+[.)])\s*/gm, '')
+                .replace(/[\*_#`]/g, '')
+                .replace(/cached snapshot/gi, 'saved health information')
+                .replace(/cached readings/gi, 'saved readings')
+                .replace(/cached data/gi, 'saved data')
+                .replace(/\bcached\b/gi, 'saved on this device')
+                .replace(/\bcache\b/gi, 'saved copy')
+                .replace(/\bORBIT\b/g, 'Orbit')
+                .replace(/\bmSv\/day\b/gi, 'millisieverts per day')
+                .replace(/\bmSv\b/gi, 'millisieverts')
+                .replace(/\bSpO2\b/gi, 'blood oxygen')
+                .replace(/[,:;|]+/g, ' ')
+                .replace(/[()[\]{}]/g, ' ')
+                .replace(/[\r\n]+/g, '. ')
+                .replace(/\s*[-–—]\s*/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (!spokenText) return;
+            const utterance = new SpeechSynthesisUtterance(spokenText);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.98;
+            const englishVoice = speechSynthesis.getVoices().find((voice) => /^en-US$/i.test(voice.lang))
+                || speechSynthesis.getVoices().find((voice) => /^en-/i.test(voice.lang));
+            if (englishVoice) utterance.voice = englishVoice;
             speechSynthesis.speak(utterance);
         }
 

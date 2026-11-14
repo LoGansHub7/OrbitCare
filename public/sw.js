@@ -1,6 +1,6 @@
 importScripts('./chatbot/store.js', './chatbot/sync.js');
 
-const CACHE = 'orbit-assistant-v11';
+const CACHE = 'orbit-assistant-v12';
 const BASE = new URL('./', self.location.href);
 const ASSETS = [
     'manifest.webmanifest', 'chatbot/offline.html', 'chatbot/assistant.css',
