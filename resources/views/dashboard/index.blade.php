@@ -106,7 +106,7 @@
             <div class="oc-card h-100">
                 <div class="oc-card-title">Data table <span class="oc-unit">accessible alternative to the charts</span></div>
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
+                    <table class="table table-sm align-middle mb-0 oc-data-table">
                         <thead><tr><th>Date</th><th>Sleep (h)</th><th>Quality</th><th>Fatigue</th><th>Exercise (min)</th><th>Resting HR (bpm)</th></tr></thead>
                         <tbody>
                         @foreach ($rows->reverse() as $r)

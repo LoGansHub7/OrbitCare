@@ -3,10 +3,47 @@
 @section('heading', 'Crew overview')
 @section('content')
     @if ($isAdmin)
-        <div class="oc-card">
-            <div class="oc-card-title">Administrator workspace</div>
-            <p class="mb-2">Account and assignment management is not available in this prototype yet.</p>
-            <p class="mb-0 text-secondary">Administrator access does not automatically grant access to private health records.</p>
+        <section class="oc-admin-hero mb-4" aria-labelledby="admin-overview-title">
+            <div class="oc-admin-hero-copy">
+                <span class="oc-admin-kicker"><i class="bi bi-broadcast-pin" aria-hidden="true"></i> MISSION CONTROL</span>
+                <h2 id="admin-overview-title">Keep the mission<br>running smoothly.</h2>
+                <p>Manage access, shape the demo mission, and explore the evidence behind OrbitCare.</p>
+                <a class="btn btn-light" href="{{ route('admin.index') }}"><i class="bi bi-sliders" aria-hidden="true"></i> Open administration</a>
+            </div>
+            <div class="oc-orbit-art" aria-hidden="true">
+                <span class="oc-orbit oc-orbit-one"></span><span class="oc-orbit oc-orbit-two"></span>
+                <span class="oc-orbit oc-orbit-three"></span><span class="oc-orbit-planet"><i class="bi bi-globe-americas"></i></span>
+                <span class="oc-orbit-satellite"><i class="bi bi-satellite"></i></span>
+            </div>
+        </section>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="oc-admin-action" href="{{ route('admin.index') }}">
+                    <span class="oc-admin-action-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <span class="oc-admin-action-title">Accounts & mission links</span>
+                    <span class="oc-admin-action-copy">Manage roles, account access, and simulated Earth-link status.</span>
+                    <span class="oc-admin-action-cta">Manage settings <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="oc-admin-action" href="{{ route('admin.demo') }}">
+                    <span class="oc-admin-action-icon"><i class="bi bi-play-circle" aria-hidden="true"></i></span>
+                    <span class="oc-admin-action-title">Demo mission control</span>
+                    <span class="oc-admin-action-copy">Set the mission day or load a fictional scenario for a walkthrough.</span>
+                    <span class="oc-admin-action-cta">Configure demo <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="oc-admin-action" href="{{ route('research.index') }}">
+                    <span class="oc-admin-action-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                    <span class="oc-admin-action-title">Research & limits</span>
+                    <span class="oc-admin-action-copy">Review source notes and the boundaries of this experimental prototype.</span>
+                    <span class="oc-admin-action-cta">Explore evidence <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                </a>
+            </div>
+        </div>
+        <div class="oc-admin-privacy mt-3"><i class="bi bi-shield-lock" aria-hidden="true"></i><span><strong>Privacy stays crew centered.</strong> Administrator access covers system settings and does not grant access to individual health records.</span></div>
         </div>
     @else
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
