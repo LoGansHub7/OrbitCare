@@ -5,6 +5,11 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/bodymap.css') }}">
+{{-- Holographic scan styling. Fonts are optional: system fonts are the fallback if they cannot load. --}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap">
+<link rel="stylesheet" href="{{ asset('css/body-map-hologram.css') }}?v={{ @filemtime(public_path('css/body-map-hologram.css')) }}">
 
 <x-page-header eyebrow="Health" title="Body Map" />
 <p class="text-secondary small mb-3">
@@ -20,7 +25,7 @@
 @else
 <div class="row g-3" data-bodymap-root data-api="{{ route('body-map.api.all') }}">
     <div class="col-lg-5">
-        <div class="card bm-figure bm-modern" data-view="front" data-bodymap-figure>
+        <div class="card bm-figure bm-modern bm-holo" data-view="front" data-bodymap-figure>
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
                     <div class="btn-group btn-group-sm" role="group" aria-label="Body view">
@@ -46,6 +51,7 @@
                 </div>
 
                 <div class="bm-stage">
+                    @include('body-map.partials.hologram-hud')
                     @include('body-map.partials.figure')
                     <div class="bm-tooltip" role="tooltip" hidden data-bodymap-tooltip></div>
                 </div>
@@ -127,5 +133,6 @@
 
 <script>window.__bodyMapRegions = @json($regions);</script>
 <script src="{{ asset('js/bodymap.js') }}" defer></script>
+<script src="{{ asset('js/bodymap-hologram.js') }}?v={{ @filemtime(public_path('js/bodymap-hologram.js')) }}" defer></script>
 @endif
 @endsection

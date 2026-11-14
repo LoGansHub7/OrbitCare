@@ -1,0 +1,318 @@
+/*
+ * Body Map: holographic scan style.
+ *
+ * Active only when the figure card has both .bm-holo and .bm-modern, so the existing
+ * Modern/Classic button still toggles between this look and the original flat look.
+ * Night is the default hologram; Day is a softer teal-on-light variant.
+ * Status colours (--bm-nominal / --bm-watch / --bm-review / --bm-urgent) stay the
+ * source of truth for region strokes and fills; they are only brightened here.
+ *
+ * SCOPE = :root .card.bm-figure.bm-holo.bm-modern (specificity is intentionally higher
+ * than the Modern Day/Night rules in bodymap.css).
+ */
+
+/* ---------- visibility: hologram-only pieces are hidden in the Classic view ---------- */
+.bm-figure:not(.bm-holo) .bm-holo-deco,
+.bm-figure:not(.bm-holo) .bm-holo-fx,
+.bm-figure:not(.bm-holo) .bm-hud,
+.bm-figure:not(.bm-holo) .bm-hud-callout,
+.bm-figure:not(.bm-modern) .bm-holo-deco,
+.bm-figure:not(.bm-modern) .bm-holo-fx,
+.bm-figure:not(.bm-modern) .bm-hud,
+.bm-figure:not(.bm-modern) .bm-hud-callout { display: none; }
+
+:root .card.bm-figure.bm-holo.bm-modern .bm-classic-ribs { display: none; }
+
+/* ---------- palette ---------- */
+:root .card.bm-figure.bm-holo.bm-modern {
+    --bm-holo-a: #2ef2d6;
+    --bm-holo-b: #19c3c3;
+    --bm-holo-text: #8ff8e9;
+    --bm-holo-dim: rgba(46, 242, 214, .55);
+    --bm-holo-grid: rgba(46, 242, 214, .08);
+    --bm-holo-panel-a: #020b12;
+    --bm-holo-panel-b: #04161f;
+    --bm-holo-chip: rgba(46, 242, 214, .06);
+    --bm-holo-chip-on: rgba(46, 242, 214, .22);
+    --bm-holo-font: "Rajdhani", "Share Tech Mono", "Bahnschrift", "Segoe UI", ui-monospace, monospace;
+    --bm-nominal: #3ddc84;
+    --bm-watch: #7fa6e8;
+    --bm-review: #ff9f43;
+    --bm-urgent: #ff5468;
+    --bm-focus: #8ff8e9;
+    --bm-glyph: #021016;
+    --bm-deco: rgba(46, 242, 214, .6);
+}
+
+:root:not([data-theme="night"]) .card.bm-figure.bm-holo.bm-modern {
+    --bm-holo-a: #0b9a90;
+    --bm-holo-b: #0a7f86;
+    --bm-holo-text: #0a6a6d;
+    --bm-holo-dim: rgba(10, 127, 134, .6);
+    --bm-holo-grid: rgba(10, 127, 134, .1);
+    --bm-holo-panel-a: #eef9f8;
+    --bm-holo-panel-b: #d9eeee;
+    --bm-holo-chip: rgba(10, 127, 134, .06);
+    --bm-holo-chip-on: rgba(10, 127, 134, .18);
+    --bm-nominal: #138a56;
+    --bm-watch: #4f77c9;
+    --bm-review: #c2610a;
+    --bm-urgent: #c42f40;
+    --bm-focus: #0a6a6d;
+    --bm-glyph: #ffffff;
+    --bm-deco: rgba(10, 127, 134, .7);
+}
+
+/* ---------- panel ---------- */
+:root .card.bm-figure.bm-holo.bm-modern {
+    color: var(--bm-holo-text);
+    border: 1px solid color-mix(in srgb, var(--bm-holo-a) 30%, transparent);
+    background:
+        radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--bm-holo-a) 12%, transparent), transparent 55%),
+        linear-gradient(160deg, var(--bm-holo-panel-a), var(--bm-holo-panel-b));
+    box-shadow: inset 0 0 44px color-mix(in srgb, var(--bm-holo-a) 8%, transparent),
+                0 0 26px color-mix(in srgb, var(--bm-holo-a) 10%, transparent);
+}
+
+:root .card.bm-figure.bm-holo.bm-modern .btn {
+    --bs-btn-border-width: 1px;
+    font-family: var(--bm-holo-font);
+    font-size: .78rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--bm-holo-text);
+    background: var(--bm-holo-chip);
+    border-color: color-mix(in srgb, var(--bm-holo-a) 45%, transparent);
+    backdrop-filter: none;
+}
+:root .card.bm-figure.bm-holo.bm-modern .btn:hover,
+:root .card.bm-figure.bm-holo.bm-modern .btn:focus-visible {
+    color: var(--bm-holo-text);
+    background: var(--bm-holo-chip-on);
+    border-color: var(--bm-holo-a);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--bm-holo-a) 40%, transparent);
+}
+:root .card.bm-figure.bm-holo.bm-modern .btn-check:checked + .btn {
+    color: var(--bm-holo-text);
+    background: var(--bm-holo-chip-on);
+    border-color: var(--bm-holo-a);
+    box-shadow: inset 0 0 8px color-mix(in srgb, var(--bm-holo-a) 35%, transparent);
+}
+
+/* Status legend: same four colours as the figure, restyled as glowing chips. */
+:root .card.bm-figure.bm-holo.bm-modern [aria-label="Status legend"] .badge {
+    background: var(--bm-holo-chip) !important;
+    border: 1px solid currentColor;
+    box-shadow: 0 0 8px -2px currentColor;
+    font-family: var(--bm-holo-font);
+    font-size: .78rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    text-shadow: 0 0 6px currentColor;
+}
+:root .card.bm-figure.bm-holo.bm-modern [aria-label="Status legend"] > .badge:nth-child(1) { color: var(--bm-nominal); }
+:root .card.bm-figure.bm-holo.bm-modern [aria-label="Status legend"] > .badge:nth-child(2) { color: var(--bm-watch); }
+:root .card.bm-figure.bm-holo.bm-modern [aria-label="Status legend"] > .badge:nth-child(3) { color: var(--bm-review); }
+:root .card.bm-figure.bm-holo.bm-modern [aria-label="Status legend"] > .badge:nth-child(4) { color: var(--bm-urgent); }
+:root .card.bm-figure.bm-holo.bm-modern [data-bodymap-extras] .btn { text-transform: none; letter-spacing: .02em; }
+
+:root .card.bm-figure.bm-holo.bm-modern .bm-tooltip {
+    font-family: var(--bm-holo-font);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--bm-holo-text);
+    background: color-mix(in srgb, var(--bm-holo-panel-a) 92%, transparent);
+    border: 1px solid color-mix(in srgb, var(--bm-holo-a) 55%, transparent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--bm-holo-a) 30%, transparent);
+}
+
+/* ---------- stage: grid, frame, figure ---------- */
+:root .card.bm-figure.bm-holo.bm-modern .bm-stage {
+    isolation: isolate;
+    container-type: inline-size;
+    border-radius: .75rem;
+    overflow: hidden;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg {
+    position: relative;
+    z-index: 1;
+    filter: none;
+}
+
+.bm-hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--bm-holo-font); color: var(--bm-holo-text); }
+.bm-hud-grid { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.bm-hud-grid-line { stroke: var(--bm-holo-grid); stroke-width: 1; }
+
+.bm-corner { position: absolute; width: 20px; height: 20px; z-index: 3; border: 0 solid var(--bm-holo-a); opacity: .75; filter: drop-shadow(0 0 3px var(--bm-holo-a)); }
+.bm-corner-tl { top: 6px; left: 6px; border-top-width: 2px; border-left-width: 2px; }
+.bm-corner-tr { top: 6px; right: 6px; border-top-width: 2px; border-right-width: 2px; }
+.bm-corner-bl { bottom: 6px; left: 6px; border-bottom-width: 2px; border-left-width: 2px; }
+.bm-corner-br { bottom: 6px; right: 6px; border-bottom-width: 2px; border-right-width: 2px; }
+
+.bm-hud-scan { position: absolute; z-index: 3; top: 14px; left: 18px; width: 110px; }
+.bm-hud-title { display: block; font-size: 1.05rem; font-weight: 700; letter-spacing: .14em; line-height: 1; color: var(--bm-holo-a); text-shadow: 0 0 8px var(--bm-holo-a); }
+.bm-hud-progress { display: block; height: 4px; margin-top: 6px; border: 1px solid color-mix(in srgb, var(--bm-holo-a) 55%, transparent); }
+.bm-hud-progress i { display: block; height: 100%; width: 0; background: var(--bm-holo-a); box-shadow: 0 0 6px var(--bm-holo-a); animation: bm-progress 5.5s steps(22, end) infinite; }
+
+.bm-hud-tag { position: absolute; z-index: 3; top: 14px; right: 18px; text-align: right; font-size: .72rem; letter-spacing: .14em; line-height: 1.25; color: var(--bm-holo-dim); }
+.bm-hud-tag .bm-hud-sub { display: block; color: var(--bm-holo-a); font-weight: 700; }
+
+.bm-hud-widgets { position: absolute; z-index: 3; left: 16px; right: 16px; bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; transition: opacity .25s ease; }
+.bm-hud-widget { width: 124px; display: flex; flex-direction: column; gap: 5px; }
+.bm-hud-row { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.bm-hud-label { font-size: .66rem; letter-spacing: .12em; line-height: 1.1; color: var(--bm-holo-dim); }
+.bm-hud-value { font-family: "Share Tech Mono", var(--bm-holo-font); font-size: .78rem; color: var(--bm-holo-a); white-space: nowrap; }
+.bm-hud-value b { font-weight: 600; text-shadow: 0 0 6px var(--bm-holo-a); }
+.bm-hud-value small { font-size: .6rem; letter-spacing: .1em; color: var(--bm-holo-dim); }
+.bm-hud-note { font-size: .55rem; letter-spacing: .14em; color: color-mix(in srgb, var(--bm-holo-dim) 75%, transparent); }
+.bm-hud-bars { gap: 7px; }
+
+.bm-ecg { display: block; width: 100%; height: 30px; overflow: hidden; border-bottom: 1px solid color-mix(in srgb, var(--bm-holo-a) 25%, transparent); }
+.bm-ecg-track { animation: bm-ecg var(--bm-ecg-period, 1.1s) linear infinite; }
+.bm-ecg-track path { fill: none; stroke: var(--bm-holo-a); stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 2px var(--bm-holo-a)); }
+
+.bm-segbar { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; height: 7px; }
+.bm-segbar i { background: color-mix(in srgb, var(--bm-holo-a) 14%, transparent); }
+.bm-segbar i.on { background: var(--bm-holo-a); box-shadow: 0 0 4px var(--bm-holo-a); }
+
+/* Narrow stages (about 360px and below): keep only the frame and the label. */
+@container (max-width: 359px) {
+    .bm-hud-widgets, .bm-hud-tag { display: none; }
+}
+/* While a region is selected, let the figure take focus. */
+.bm-figure.bm-has-selection .bm-hud-widgets { opacity: .3; }
+
+/* ---------- silhouette and layers ---------- */
+.bm-holo-stop-a { stop-color: var(--bm-holo-a); }
+.bm-holo-stop-b { stop-color: var(--bm-holo-b); }
+.bm-holo-hatch-line { stroke: var(--bm-holo-a); stroke-width: .55; stroke-opacity: .4; }
+.bm-holo-rim { stroke: var(--bm-holo-a); stroke-opacity: .5; }
+.bm-holo-hatch { opacity: .6; }
+.bm-holo-fx .bm-holo-lines :is(path) { fill: none; stroke: var(--bm-holo-a); stroke-width: .6; stroke-opacity: .28; stroke-dasharray: 2 2.5; }
+
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-region="skin"] { filter: url(#bm-holo-glow); }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-region="skin"] :is(path, ellipse) {
+    fill: url(#bm-holo-body);
+    fill-opacity: 1;
+    stroke: url(#bm-holo-line);
+    stroke-opacity: 1;
+    stroke-width: 1.5;
+    stroke-dasharray: none;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-region="skin"]:hover :is(path, ellipse),
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-region="skin"].is-selected :is(path, ellipse) {
+    fill: url(#bm-holo-body);
+    fill-opacity: 1;
+    stroke-width: 2.2;
+}
+
+/* Decorative anatomy */
+.bm-holo-deco :is(path, ellipse, circle) {
+    fill: var(--bm-holo-a);
+    fill-opacity: .07;
+    stroke: var(--bm-holo-a);
+    stroke-opacity: .62;
+    stroke-width: .9;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+.bm-holo-deco .bm-holo-lines { fill: none; fill-opacity: 0; }
+.bm-holo-deco .bm-halo { fill-opacity: .08; stroke: none; transform-box: fill-box; transform-origin: center; }
+.bm-holo-deco .bm-halo-heart { animation: bm-halo var(--bm-beat, 1.1s) ease-in-out infinite; }
+.bm-holo-deco .bm-halo-lung { animation: bm-halo-slow 5s ease-in-out infinite; }
+
+/* ---------- interactive regions: status colour as a glowing stroke ---------- */
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region :is(path, ellipse, circle) {
+    fill: var(--st);
+    fill-opacity: .12;
+    stroke: var(--st);
+    stroke-opacity: .9;
+    stroke-width: 1.15;
+    stroke-dasharray: none;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-layer="muscle"] :is(path, ellipse, circle) {
+    fill-opacity: .07;
+    stroke-opacity: .6;
+    stroke-dasharray: 3 2;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-layer="skeleton"] :is(path, ellipse, circle) { fill-opacity: .16; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region .bm-hit { fill: transparent; stroke: none; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region .bm-line {
+    fill: none;
+    stroke: var(--st);
+    stroke-width: 3;
+    stroke-opacity: .9;
+    filter: none;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region .bm-spine { stroke-width: 4; stroke-dasharray: 5 3; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region .bm-pupil { fill: var(--bm-holo-text); fill-opacity: 1; stroke: none; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-deco { stroke: var(--bm-deco); stroke-width: .9; }
+
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region:not([data-region="skin"]) { filter: drop-shadow(0 0 2.5px var(--st)); }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region:not([data-region="skin"]):hover { filter: drop-shadow(0 0 7px var(--st)); }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region:not([data-region="skin"]):hover :is(path, ellipse, circle) {
+    fill-opacity: .34;
+    stroke-opacity: 1;
+    stroke-width: 1.7;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region.is-selected:not([data-region="skin"]) { filter: drop-shadow(0 0 9px var(--st)); }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region.is-selected:not([data-region="skin"]) :is(path, ellipse, circle) {
+    fill-opacity: .4;
+    stroke-opacity: 1;
+    stroke-width: 2.5;
+    stroke-dasharray: none;
+}
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region.is-selected .bm-line { stroke-width: 4.5; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region:focus-visible :is(path, ellipse, circle) { stroke: var(--bm-focus); stroke-width: 2.6; }
+:root .card.bm-figure.bm-holo.bm-modern .bm-svg .bm-region[data-status="urgent"]:not(.is-selected):not([data-region="skin"]) { animation: bm-holo-glow 2.2s ease-in-out infinite; }
+
+/* ---------- status markers as glowing circular nodes ---------- */
+:root .card.bm-figure.bm-holo.bm-modern .bm-marker { filter: drop-shadow(0 0 3.5px var(--mc, var(--bm-watch))); }
+.bm-node-ring { fill: color-mix(in srgb, var(--bm-holo-panel-a) 70%, transparent); stroke: var(--mc, var(--bm-watch)); stroke-width: 1; }
+.bm-node-halo { fill: none; stroke: var(--mc, var(--bm-watch)); stroke-width: 1; transform-box: fill-box; transform-origin: center; opacity: 0; }
+.bm-marker[data-status="review"] .bm-node-halo,
+.bm-marker[data-status="urgent"] .bm-node-halo { animation: bm-node 1.8s ease-out infinite; }
+.bm-marker[data-status="urgent"] .bm-node-halo { animation-duration: 1.1s; }
+
+/* ---------- scan line ---------- */
+.bm-scan { animation: bm-scan 4.8s ease-in-out infinite alternate; }
+.bm-scan-edge { fill: var(--bm-holo-text); opacity: .75; }
+
+/* ---------- selection callout (positioned by bodymap-hologram.js) ---------- */
+.bm-hud-callout { position: absolute; inset: 0; z-index: 4; pointer-events: none; font-family: var(--bm-holo-font); }
+.bm-callout-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.bm-hud-callout { --co: var(--bm-holo-a); }
+.bm-callout-line { fill: none; stroke: var(--co); stroke-width: 1; stroke-opacity: .9; filter: drop-shadow(0 0 2px var(--co)); }
+.bm-callout-dot { fill: var(--co); filter: drop-shadow(0 0 4px var(--co)); }
+.bm-ring { fill: none; stroke: var(--co); stroke-width: 1.3; transform-box: fill-box; transform-origin: center; animation: bm-ring 1.8s ease-out infinite; }
+.bm-ring-delay { animation-delay: .9s; }
+.bm-callout-label {
+    position: absolute;
+    padding: 2px 8px 3px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--co);
+    background: color-mix(in srgb, var(--bm-holo-panel-a) 85%, transparent);
+    border: 1px solid var(--co);
+    box-shadow: 0 0 10px -2px var(--co);
+    text-shadow: 0 0 6px var(--co);
+}
+
+/* ---------- motion ---------- */
+@keyframes bm-scan { from { transform: translateY(0); } to { transform: translateY(660px); } }
+@keyframes bm-progress { 0% { width: 4%; } 82% { width: 100%; } 100% { width: 100%; } }
+@keyframes bm-ecg { from { transform: translateX(0); } to { transform: translateX(-80px); } }
+@keyframes bm-halo { 0%, 100% { transform: scale(.92); opacity: .5; } 14% { transform: scale(1.12); opacity: 1; } 28% { transform: scale(.97); opacity: .6; } 42% { transform: scale(1.06); opacity: .85; } }
+@keyframes bm-halo-slow { 0%, 100% { transform: scale(.96); opacity: .55; } 50% { transform: scale(1.06); opacity: 1; } }
+@keyframes bm-ring { 0% { transform: scale(.5); opacity: .95; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes bm-node { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes bm-holo-glow { 0%, 100% { filter: drop-shadow(0 0 2px var(--st)); } 50% { filter: drop-shadow(0 0 9px var(--st)); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .bm-scan { display: none; }
+    .bm-hud-progress i { width: 62%; }
+    .bm-hud-callout .bm-ring { opacity: .5; }
+}
