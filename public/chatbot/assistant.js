@@ -12,7 +12,10 @@
     const KNOWLEDGE_FILES = ['intents.json', 'health-knowledge.json', 'procedures.json', 'faq.json'];
     const DEFAULT_CHIPS = ['What is my latest heart rate?', 'how to get good sleep', 'I have a headache', 'What radiation protection should I follow?'];
     const STATUS_LABELS = { normal: 'No trend flag', watch: 'Watch', unknown: 'Insufficient data' };
+    // Body map region levels mapped to the existing status badge styles.
+    const REGION_STATUS = { nominal: ['normal', 'Nominal'], watch: ['unknown', 'Monitoring'], review: ['watch', 'Review'], urgent: ['watch', 'Priority review'] };
     const MENU = [
+        { label: 'Body map', icon: 'bi-person-bounding-box', items: ['Which body parts need review?', 'Tell me about my whole body / radiation exposure', 'Tell me about my head & brain', 'Tell me about my heart', 'Tell me about my lungs', 'Tell me about my eyes', 'Tell me about my spine', 'Tell me about my upper-body muscles', 'Tell me about my lower-body muscles', 'Tell me about my long bones', 'Tell me about my digestive system', 'Tell me about my skin'] },
         { label: 'Vitals', icon: 'bi-heart-pulse', items: ['What is my latest heart rate?', 'What is my latest blood pressure?', 'What is my latest SpO2?'] },
         { label: 'Sleep', icon: 'bi-moon-stars', items: ['how to get good sleep', 'circadian rhythm routine'] },
         { label: 'Exercise', icon: 'bi-activity', items: ['How do I protect my bones and muscles?', 'Give me a treadmill routine'] },
@@ -23,6 +26,7 @@
     ];
     // Keys are the real route names (data-page). The first matching entry wins.
     const PAGE_CHIPS = [
+        { match: /^body-map\./, hello: 'You are on the body map. Select a body part and I can explain its status, vitals, space hazards, what to do and when to escalate.', questions: ['Which body parts need review?', 'Tell me about my whole body / radiation exposure', 'When should I escalate heart problems?'] },
         { match: /^dashboard$/, hello: 'Your dashboard is open. I can read your latest cached vitals and explain any flagged alerts.', questions: ['What is my latest heart rate?', 'What is my latest blood pressure?'] },
         { match: /^alerts\./, hello: 'You are on the alerts page. I can explain which trend rules are flagged and what to do next.', questions: ['Explain my alerts', 'What is my latest heart rate?'] },
         { match: /^readings\./, hello: 'You are on your readings. Ask about any recorded metric.', questions: ['What is my latest SpO2?', 'What is my latest blood pressure?'] },
@@ -308,6 +312,14 @@
             ]);
         }
 
+        function regionCard(card) {
+            const [tone, label] = REGION_STATUS[card.status_level] || REGION_STATUS.watch;
+            return h('div', { class: 'oc-orbit-card oc-orbit-card--vitals' }, [
+                h('div', { class: 'oc-orbit-card-head' }, [h('strong', { text: card.title }), h('span', { class: `oc-orbit-status oc-orbit-status--${tone}`, text: label })]),
+                h('p', { class: 'oc-orbit-muted small mb-0', text: `Body map${card.body_system ? ` · ${card.body_system}` : ''}` }),
+            ]);
+        }
+
         function flightSurgeonCard(summary) {
             const button = h('button', { type: 'button', class: 'oc-orbit-action-btn' }, [h('i', { class: 'bi bi-clipboard', 'aria-hidden': 'true' }), ' Copy handoff note']);
             button.addEventListener('click', () => copyText(summary, button));
@@ -326,7 +338,10 @@
             if (card?.type === 'vitals') bubble.append(vitalsCard(card));
             if (card?.type === 'emergency') bubble.append(emergencyCard(card));
             if (card?.type === 'checklist') bubble.append(checklistCard(card));
-            if (role === 'assistant' && card && (card.type === 'emergency' || card.type === 'checklist' || (card.type === 'vitals' && card.status === 'watch'))) {
+            if (card?.type === 'region') bubble.append(regionCard(card));
+            const needsHandoff = card && (card.type === 'emergency' || card.type === 'checklist' || (card.type === 'vitals' && card.status === 'watch')
+                || (card.type === 'region' && ['review', 'urgent'].includes(card.status_level)));
+            if (role === 'assistant' && needsHandoff) {
                 bubble.append(flightSurgeonCard(`ORBIT handoff: ${card.title || card.label}. ${card.escalate ? `Escalation: ${card.escalate}` : `Status: ${STATUS_LABELS[card.status]}.`}`));
             }
             const meta = h('div', { class: 'oc-orbit-meta' }, [h('time', { datetime: createdAt, text: timeOf(createdAt) })]);
@@ -576,8 +591,12 @@
         globalThis.OrbitAssistant = {
             askAbout(text) {
                 if (mode === 'floating') setOpen(true);
-                if (el.input) el.input.value = text;
-                el.form?.requestSubmit();
+                // Refresh first so the answer reflects the statuses currently shown on the map.
+                const submit = () => {
+                    if (el.input) el.input.value = text;
+                    el.form?.requestSubmit();
+                };
+                refreshSnapshot().then(submit, submit);
             },
         };
 

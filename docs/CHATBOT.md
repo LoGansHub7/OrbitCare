@@ -118,6 +118,22 @@ does not expose personal data and its conversations are temporary.
   Implemented in `ChatbotOversightController`.
 - **Saving.** Online messages sync to `chatbot_messages` by `(astronaut_id, client_id)`.
   Offline messages wait in the IndexedDB queue and are sent without duplicates.
+- **Body map answers.** The snapshot carries `body_regions` (name, status level, function,
+  latest vitals with source and freshness, linked hazards, and guidance for all four status
+  levels), built by `BodyMapService::regionsFor($crew, true)` for the signed-in astronaut only.
+  The engine answers each region (and "Which body parts need review?" for the whole body) from
+  that cached data, so it works offline and never invents body-map facts. Facets, chosen from
+  the wording: overview, what it does, vitals, space hazards, what to do, when to escalate,
+  all status levels, and "what if it were Review/Urgent". After a region answer, short
+  follow-ups ("when should I escalate?") stay on that region. A word that fits several
+  regions ("muscles", "legs") lists them and asks which one. Existing topic and metric
+  answers win for questions they already answered, such as "how do I protect my bones"
+  or "what is my radiation dose" (answered from the snapshot's `radiation` block). Only
+  whole-body wording ("whole body / radiation exposure") opens the whole-body region.
+  The map's "Ask ORBIT about this" button refreshes the snapshot before asking, and
+  region replies show a status card. Chips, menu and the `body-map.` page hint list
+  every region.
+  Tests: `tests/js/orbit-body-map.test.mjs`, `tests/Feature/ChatbotBodyMapSnapshotTest.php`.
 
 
 ## Quality and testing (Phase 6)
@@ -129,7 +145,7 @@ does not expose personal data and its conversations are temporary.
   `node --test tests/js/orbit-engine.test.mjs tests/js/orbit-knowledge.test.mjs tests/js/orbit-accuracy.test.mjs`.
 - Run the PHP suite with `php artisan test --filter=Chatbot`.
 - Service worker: any change to `public/chatbot/*.js` or JSON requires bumping `CACHE`
-  in `public/sw.js` (currently `orbit-assistant-v9`). Otherwise clients keep the old
+  in `public/sw.js` (currently `orbit-assistant-v11`). Otherwise clients keep the old
   cache.
 
 Run `php artisan migrate` on the intended local development database; it applies

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MetricDefinition;
 use App\Models\RadiationReading;
 use App\Services\AlertEvaluationService;
+use App\Services\BodyMapService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +44,7 @@ class ChatbotController extends Controller
             'astronaut_id' => $request->user()->id,
             'captured_at' => now()->toIso8601String(),
             'rule_states' => app(AlertEvaluationService::class)->currentStates($crew),
+            'body_regions' => app(BodyMapService::class)->regionsFor($crew, true),
             'readings' => $readings,
             'radiation' => $radiation ? [
                 'dose_rate' => (float) $radiation->dose_rate,

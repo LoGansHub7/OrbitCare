@@ -29,7 +29,7 @@ class BodyMapService
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function regionsFor(CrewProfile $crew): array
+    public function regionsFor(CrewProfile $crew, bool $withGuidanceLevels = false): array
     {
         $states = $this->alerts->currentStates($crew, true);
         $hazardStatuses = $this->alerts->hazardStatuses($crew);
@@ -39,7 +39,7 @@ class BodyMapService
             ->orderBy('sort_order')
             ->get();
 
-        return $regions->map(fn (BodyRegion $region) => $this->buildRegion($region, $crew, $states, $hazardStatuses))->all();
+        return $regions->map(fn (BodyRegion $region) => $this->buildRegion($region, $crew, $states, $hazardStatuses, $withGuidanceLevels))->all();
     }
 
     public function regionDetail(CrewProfile $crew, string $slug): ?array
@@ -80,7 +80,7 @@ class BodyMapService
         return $data;
     }
 
-    private function buildRegion(BodyRegion $region, CrewProfile $crew, array $states, array $hazardStatuses): array
+    private function buildRegion(BodyRegion $region, CrewProfile $crew, array $states, array $hazardStatuses, bool $withGuidanceLevels = false): array
     {
         $metrics = $region->metrics->map(fn ($m) => $this->metricSnapshot($crew, $m))->all();
 
@@ -88,7 +88,7 @@ class BodyMapService
 
         $guidance = $region->guidanceFor($statusLevel);
 
-        return [
+        $data = [
             'slug' => $region->slug,
             'name' => $region->name,
             'body_system' => $region->body_system,
@@ -111,6 +111,17 @@ class BodyMapService
                 'sources' => $guidance->sources,
             ] : null,
         ];
+
+        // The offline assistant answers "what if this region were at level X", so it needs every level.
+        if ($withGuidanceLevels) {
+            $data['guidance_levels'] = $region->guidance->mapWithKeys(fn ($g) => [$g->status_level => [
+                'self_care_steps' => $g->self_care_steps,
+                'red_flags' => $g->red_flags,
+                'escalate_to' => $g->escalate_to,
+            ]])->all();
+        }
+
+        return $data;
     }
 
     /**
@@ -202,7 +213,7 @@ class BodyMapService
                 'Mood', '1-5 scale', 'mood', 'recorded_at'
             ),
             'cabin_co2' => $this->fromLatest(
-                CabinReading::query()->orderByDesc('recorded_at')->first(),
+                CabinReading::query()->where('mission_id', $crew->mission_id)->orderByDesc('recorded_at')->first(),
                 'Cabin CO2', 'ppm', 'co2_level', 'recorded_at'
             ),
             'physical_deconditioning' => $this->fromLatest(
@@ -271,7 +282,7 @@ class BodyMapService
             'radiation_dose' => [RadiationReading::query()->where('crew_profile_id', $crew->id), 'dose_rate'],
             'wellbeing_mood' => [WellbeingCheckin::query()->where('crew_profile_id', $crew->id), 'mood'],
             'physical_deconditioning' => [PhysicalReading::query()->where('crew_profile_id', $crew->id), 'exercise_minutes'],
-            'cabin_co2' => [CabinReading::query(), 'co2_level'],
+            'cabin_co2' => [CabinReading::query()->where('mission_id', $crew->mission_id), 'co2_level'],
             default => [null, null],
         };
 

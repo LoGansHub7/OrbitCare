@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "intents": [
-    {"id":"greeting","phrases":["hello","hi","hey","good morning"],"response":"Hello, I am ORBIT. Ask about a recorded metric or choose a topic: sleep, exercise, radiation, mental wellness, or nutrition."},
-    {"id":"help","phrases":["help","what can you do","options","menu","topics"],"response":"I can answer general questions about cardiovascular health, bone and muscle, radiation, sleep, vision and motion, mental wellness, nutrition and hydration, infection and minor injury, general symptoms, and cabin air. I can also report your latest cached readings. I cannot diagnose or replace your mission medical team."}
+    {"id":"greeting","phrases":["hello","hi","hey","good morning","good afternoon","good evening"],"response":"Hello, I am ORBIT. Ask about a recorded metric, tap a body part on the Body Map, or choose a topic: sleep, exercise, radiation, mental wellness, or nutrition. I can also do simple calculations."},
+    {"id":"help","phrases":["help","what can you do","what do you do","options","menu","topics"],"response":"I can answer general questions about cardiovascular health, bone and muscle, radiation, sleep, vision and motion, mental wellness, nutrition and hydration, infection and minor injury, general symptoms, and cabin air. I can report your latest cached readings and explain your alerts. For any body map region, or your whole body, ask me about its status, vitals, space hazards, what to do and when to escalate. I can also do simple calculations. I cannot diagnose or replace your mission medical team."}
   ]
 }

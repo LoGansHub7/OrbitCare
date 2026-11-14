@@ -101,7 +101,247 @@
         };
     }
 
-    function select(text, knowledge, context = {}) {
+    // ---------- body map regions ----------
+    // Extra names per region slug. The names, statuses, vitals and guidance themselves always come from the
+    // cached snapshot (snapshot.body_regions), so the assistant never invents body-map facts.
+    const REGION_SYNONYMS = {
+        'head-brain': ['head', 'brain', 'mind', 'cognition', 'neurological'],
+        eyes: ['eye', 'eyes', 'eyesight', 'sight'],
+        heart: ['heart', 'cardiac'],
+        lungs: ['lung', 'lungs', 'respiratory'],
+        spine: ['spine', 'spinal', 'backbone', 'back', 'vertebrae'],
+        'upper-body-muscles': ['upper body', 'arm', 'arms', 'shoulder', 'shoulders', 'biceps', 'upper muscles', 'muscles'],
+        'lower-body-muscles': ['lower body', 'leg', 'legs', 'thigh', 'thighs', 'calf', 'calves', 'lower muscles', 'muscles'],
+        'long-bones': ['bones', 'bone density', 'skeleton', 'hip', 'hips', 'leg', 'legs', 'femur'],
+        digestive: ['digestion', 'stomach', 'gut', 'abdomen', 'bowel', 'intestines'],
+        skin: ['skin', 'rash'],
+        'whole-body-radiation': ['whole body', 'entire body', 'full body'],
+    };
+    const STATUS_TEXT = {
+        nominal: ['Nominal', 'No implemented trend rule is flagged for this region right now. This is not a medical clearance.'],
+        watch: ['Monitoring', 'There is too little recent data for the rules to judge this region, so it is only being monitored. Missing data is not the same as normal.'],
+        review: ['Review', 'An experimental trend rule linked to this region is flagged for review.'],
+        urgent: ['Priority review', 'A priority-review trend rule linked to this region is flagged. Review the evidence now and follow the escalation steps.'],
+    };
+    const LEVELS = ['nominal', 'watch', 'review', 'urgent'];
+    const LEVEL_WORDS = [
+        ['urgent', 'urgent|priority(?: review)?'], ['review', 'review'], ['watch', 'watch|monitoring'], ['nominal', 'nominal|normal'],
+    ];
+
+    function regionAliases(region) {
+        const names = new Set();
+        const full = normalize(region.name || '');
+        if (full) names.add(full);
+        // Name fragments ("Head", "Brain") are aliases only when a single word; longer fragments such as
+        // "Radiation Exposure" would otherwise hijack generic topic questions.
+        String(region.name || '').split(/[&/()]|\band\b/i).map(normalize).filter((part) => part && !part.includes(' ')).forEach((part) => names.add(part));
+        (REGION_SYNONYMS[region.slug] || []).forEach((alias) => names.add(normalize(alias)));
+        return { full, aliases: [...names] };
+    }
+
+    function findRegions(text, snapshot) {
+        const regions = snapshot?.body_regions;
+        if (!Array.isArray(regions) || !regions.length) return [];
+        const hits = [];
+        for (const region of regions) {
+            const { full, aliases } = regionAliases(region);
+            let weight = 0;
+            let strong = false;
+            for (const alias of aliases) {
+                if (phraseScore(text, alias) < 0.75) continue;
+                const size = tokens(alias).length;
+                weight += size;
+                if (size >= 2) strong = true;
+            }
+            if (weight) hits.push({ region, weight, strong, named: tokens(full).length >= 2 && phraseScore(text, full) >= 0.75 });
+        }
+        return hits;
+    }
+
+    // via: 'name' (full multi-word name typed), 'strong' (multi-word alias) or 'alias' (a single word such as "heart").
+    function pickRegions(hits) {
+        if (!hits.length) return { via: null, regions: [] };
+        const named = hits.filter((hit) => hit.named);
+        const pool = named.length ? named : hits;
+        const top = Math.max(...pool.map((hit) => hit.weight));
+        const best = pool.filter((hit) => hit.weight === top);
+        return {
+            via: named.length ? 'name' : (best.some((hit) => hit.strong) ? 'strong' : 'alias'),
+            regions: best.map((hit) => hit.region),
+        };
+    }
+
+    function isOverallQuery(normalized) {
+        return /\b(?:body map|body overview|body summary|(?:summary|overview) of my body|my body overall|overall body|(?:all|every|each)(?: of)?(?: my)?(?: body)? (?:parts?|regions?|organs?|systems?|areas?)|which (?:body )?(?:parts?|regions?|organs?|systems?|areas?)|how (?:s|is|are) my body|any (?:body )?(?:parts?|regions?) (?:that )?need)\b/.test(normalized);
+    }
+
+    // `explicit` is false when the text names no particular aspect, which means "tell me everything".
+    function facetOf(normalized) {
+        const levelPattern = LEVEL_WORDS.map(([, pattern]) => pattern).join('|');
+        const conditional = new RegExp(`\\b(?:if|when|whenever|suppose)\\b.*\\b(?:is|are|was|were|goes|go|becomes|become|turns|turn|gets|get)\\b.*\\b(?:${levelPattern})\\b`);
+        const levelNoun = new RegExp(`\\b(?:${levelPattern}) (?:status|level|state)\\b`);
+        if (conditional.test(normalized) || levelNoun.test(normalized)) {
+            const level = LEVEL_WORDS.find(([, pattern]) => new RegExp(`\\b(?:${pattern})\\b`).test(normalized))?.[0];
+            if (level) return { facet: 'level', level, explicit: true };
+        }
+        if (/\b(?:status levels?|all (?:the )?(?:status(?:es)?|levels?)|each (?:status|level)|every (?:status|level)|different (?:status(?:es)?|levels?)|what do (?:the )?(?:status(?:es)?|levels?|badges?|colou?rs?) mean|what if (?:it|this|that|my \w+) (?:gets?|becomes?|worsens?)|gets? worse)\b/.test(normalized)) {
+            return { facet: 'levels', level: null, explicit: true };
+        }
+        const cues = [
+            ['escalate', /\b(?:escalat\w*|red flags?|warning signs?|danger signs?|when (?:should|do|to) i (?:call|worry|get help|seek|report|tell)|who (?:should|do) i (?:call|contact|tell|report)|see (?:a )?(?:doctor|medical|flight surgeon)|medical officer|flight surgeon)\b/],
+            ['actions', /\b(?:what (?:can|should|could|do) i do|self care|steps?|advice|tips?|how (?:can|do|should) i (?:protect|improve|look after|care|keep|support|manage|reduce|prevent)|protect|improve|look after|action)\b/],
+            ['hazards', /\b(?:hazards?|affect(?:s|ing|ed)?|microgravity|spaceflight|in space|why (?:does|do|is|are) (?:it|this|that|my \w+) (?:matter|important)|why it matters|matters?|risks?|causes?|causing)\b/],
+            ['vitals', /\b(?:vitals?|readings?|metrics?|values?|numbers?|measurements?|trends?|history|chart|data|how (?:high|low))\b/],
+            ['function', /\b(?:what does (?:it|this|that|my \w+|the \w+) do|what is (?:it|this|that) for|function|purpose|role|how does (?:it|this|that|my \w+) work|what is the \w+ for)\b/],
+        ];
+        const cue = cues.find(([, pattern]) => pattern.test(normalized));
+        return cue ? { facet: cue[0], level: null, explicit: true } : { facet: 'overview', level: null, explicit: false };
+    }
+
+    function regionIntent(slugs, normalized, entities) {
+        const { facet, level } = facetOf(normalized);
+        return { intent: 'region', regions: slugs, facet, level, confidence: 1, entities };
+    }
+
+    function whenText(iso) {
+        const date = new Date(iso);
+        return Number.isNaN(date.getTime()) ? null : date.toISOString();
+    }
+
+    function regionMetricLine(metric) {
+        const label = metric.label || 'Metric';
+        if (metric.value === null || metric.value === undefined) return `- **${label}**: no value recorded in your body map data yet.`;
+        const recorded = whenText(metric.observed_at);
+        const notes = [metric.source ? `source: ${metric.source}` : null, metric.freshness === 'stale' ? 'stale' : null].filter(Boolean);
+        return `- **${label}**: ${metric.value} ${metric.unit || ''}`.trimEnd() + `${recorded ? `, recorded ${recorded}` : ''}${notes.length ? ` (${notes.join(', ')})` : ''}`;
+    }
+
+    function statusOf(region) {
+        return STATUS_TEXT[region.status_level] || STATUS_TEXT.watch;
+    }
+
+    function regionHeader(region) {
+        const system = region.body_system ? ` (${String(region.body_system).replace(/_/g, ' ')})` : '';
+        return `**${region.name}**${system}. Status: **${statusOf(region)[0]}**.`;
+    }
+
+    function guidanceBlocks(guidance) {
+        const steps = guidance?.self_care_steps || [];
+        const flags = guidance?.red_flags || [];
+        return {
+            steps: ['**What you can do now**', ...(steps.length ? steps.map((step, index) => `${index + 1}. ${step}`) : ['No guidance is stored for this status yet.'])],
+            escalate: ['**When to escalate**', ...(flags.length ? flags.map((flag) => `- ${flag}`) : ['- No red flags are stored for this status yet.']), ...(guidance?.escalate_to ? [`Escalate to: ${guidance.escalate_to}.`] : [])],
+        };
+    }
+
+    function hazardBlock(region) {
+        const hazards = region.hazards || [];
+        return ['**What affects this in space**', ...(hazards.length ? hazards.map((item) => `- **${item.name}**: ${item.why_it_matters}`) : ['- No spaceflight hazards are linked to this region yet.'])];
+    }
+
+    function vitalsBlock(region) {
+        const metrics = region.metrics || [];
+        return ['**Current vitals**', ...(metrics.length ? metrics.map(regionMetricLine) : ['- No metrics are linked to this region yet.'])];
+    }
+
+    function levelBlock(region, level, disclaimer) {
+        const entry = region.guidance_levels?.[level] || (region.status_level === level ? region.guidance : null);
+        const { steps, escalate } = guidanceBlocks(entry);
+        if (!entry) return [`${region.name} guidance for ${STATUS_TEXT[level][0]} is not available in the cached snapshot. Reconnect to refresh it.`];
+        return [`If **${region.name}** reaches **${STATUS_TEXT[level][0]}**: ${STATUS_TEXT[level][1]}`, ...steps, ...escalate, disclaimer];
+    }
+
+    function allLevelsBlock(region, disclaimer) {
+        const lines = [`How **${region.name}** guidance changes with its status (currently **${statusOf(region)[0]}**):`];
+        for (const level of LEVELS) {
+            const entry = region.guidance_levels?.[level] || (region.status_level === level ? region.guidance : null);
+            lines.push(`**${STATUS_TEXT[level][0]}${region.status_level === level ? ' (current)' : ''}**`);
+            if (!entry) {
+                lines.push('- Not available in the cached snapshot.');
+                continue;
+            }
+            lines.push(`- Do: ${(entry.self_care_steps || []).join(' ') || 'No steps stored.'}`);
+            lines.push(`- Watch for: ${(entry.red_flags || []).join(' ') || 'No red flags stored.'}`);
+            if (entry.escalate_to) lines.push(`- Escalate to: ${entry.escalate_to}`);
+        }
+        lines.push(disclaimer);
+        return lines;
+    }
+
+    function regionReply(region, facet, level, disclaimer) {
+        const [label, meaning] = statusOf(region);
+        const { steps, escalate } = guidanceBlocks(region.guidance);
+        let lines;
+        switch (facet) {
+        case 'function':
+            lines = [`**${region.name}**: ${region.function_text || 'No description is stored for this region.'}`];
+            break;
+        case 'vitals':
+            lines = [`${regionHeader(region)}`, ...vitalsBlock(region), 'These are your latest recorded values and are not a diagnosis.'];
+            break;
+        case 'hazards':
+            lines = [`**${region.name}**`, ...hazardBlock(region)];
+            break;
+        case 'actions':
+            lines = [`${regionHeader(region)}`, ...steps, ...escalate];
+            break;
+        case 'escalate':
+            lines = [`${regionHeader(region)}`, ...escalate, disclaimer];
+            break;
+        case 'level':
+            lines = levelBlock(region, level, disclaimer);
+            break;
+        case 'levels':
+            lines = allLevelsBlock(region, disclaimer);
+            break;
+        default:
+            lines = [
+                regionHeader(region), meaning,
+                `What it does: ${region.function_text || 'No description is stored for this region.'}`,
+                ...vitalsBlock(region), ...hazardBlock(region), ...steps, ...escalate, disclaimer,
+            ];
+        }
+        return { text: lines.filter(Boolean).join('\n'), label };
+    }
+
+    function regionAnswer(result, snapshot, disclaimer) {
+        const regions = (snapshot?.body_regions || []).filter((region) => result.regions.includes(region.slug));
+        if (!regions.length) {
+            return { reply: 'No body map data is available in the cached snapshot on this device. Reconnect while signed in so ORBIT can refresh it.', card: null };
+        }
+        if (regions.length > 1) {
+            const lines = ['That could mean more than one body map region. Which one do you mean?',
+                ...regions.map((region) => `- **${region.name}**: ${statusOf(region)[0]}. Ask "Tell me about my ${region.name.toLowerCase()}".`)];
+            return { reply: lines.join('\n'), card: null };
+        }
+        const region = regions[0];
+        const { text } = regionReply(region, result.facet, result.level, disclaimer);
+        const card = {
+            type: 'region', title: region.name, body_system: String(region.body_system || '').replace(/_/g, ' '),
+            status_level: region.status_level, escalate: region.guidance?.escalate_to || 'Crew medical officer',
+        };
+        return { reply: text, card };
+    }
+
+    function overviewReply(snapshot, disclaimer) {
+        const regions = snapshot?.body_regions;
+        if (!Array.isArray(regions) || !regions.length) {
+            return 'No body map data is available in the cached snapshot on this device. Reconnect while signed in so ORBIT can refresh it.';
+        }
+        const lines = [`Body map summary: ${regions.length} regions, using the same experimental rules as your alerts.`];
+        for (const level of ['urgent', 'review', 'watch', 'nominal']) {
+            const names = regions.filter((region) => region.status_level === level).map((region) => region.name);
+            if (names.length) lines.push(`- **${STATUS_TEXT[level][0]} (${names.length})**: ${names.join(', ')}`);
+        }
+        const flagged = regions.filter((region) => ['urgent', 'review'].includes(region.status_level)).length;
+        lines.push(flagged
+            ? `${flagged} region${flagged > 1 ? 's are' : ' is'} flagged for review. Ask about one, for example "Tell me about my ${regions.find((region) => ['urgent', 'review'].includes(region.status_level)).name.toLowerCase()}".`
+            : 'No region is flagged for review. "Nominal" means no implemented rule triggered, and "Monitoring" means there is too little recent data. Neither is a medical clearance.');
+        lines.push(disclaimer);
+        return lines.filter(Boolean).join('\n');
+    }
+
+    function select(text, knowledge, context = {}, snapshot = null) {
         const normalized = normalize(text);
         const entities = extract(text);
         if (isBasicArithmetic(text)) return { intent: 'arithmetic', confidence: 1, entities };
@@ -110,6 +350,11 @@
         const procedure = findProcedure(normalized, knowledge.procedures);
         if (procedure) return { intent: 'emergency', procedure: procedure.id, confidence: 1, entities };
         if (/\b(?:alerts?|warnings?|flags?)\b/.test(normalized)) return { intent: 'alerts', confidence: 1, entities };
+        // A body-map region named in full ("Whole Body / Radiation Exposure") or by a multi-word alias beats
+        // metric matching; a single-word alias ("heart") defers to metrics and confident topics below.
+        const found = pickRegions(findRegions(text, snapshot));
+        if (found.via && found.via !== 'alias') return regionIntent(found.regions.map((region) => region.slug), normalized, entities);
+        if (!found.via && isOverallQuery(normalized)) return { intent: 'body_overview', confidence: 1, entities };
         if (entities.metrics.length > 1) return { intent: 'clarify', confidence: 0, entities };
         // "and" is left out on purpose: it appears in ordinary topic questions ("bones and muscles").
         const followUp = /\b(?:what about|how about|why|last week|yesterday)\b/.test(normalized);
@@ -139,6 +384,15 @@
         const tied = scores[1] && scores[0].confidence - scores[1].confidence < 0.1;
         // Ties are resolved when both topics sit in one category or the leader's phrase is more specific.
         const resolved = scores[1] && ((scores[0].category && scores[0].category === scores[1].category) || scores[0].specificity > scores[1].specificity);
+        // Body-map regions answer only when no topic is a confident match, so "how do I protect my bones"
+        // and "my head hurts" keep their existing topic answers.
+        const topicConfident = scores.length && scores[0].confidence >= 0.75;
+        if (!topicConfident) {
+            const slugs = found.via === 'alias'
+                ? found.regions.map((region) => region.slug)
+                : (context.region && facetOf(normalized).explicit ? [context.region] : []);
+            if (slugs.length) return regionIntent(slugs, normalized, entities);
+        }
         if (!scores.length || scores[0].confidence < 0.75 || (tied && !resolved)) {
             return { intent: 'clarify', confidence: scores[0]?.confidence || 0, entities };
         }
@@ -147,12 +401,11 @@
     }
 
     function basicConversation(text) {
-        if (/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(text)) return 'Hello! What can I help you with? I can answer general questions, do simple calculations, and report recorded crew data.';
+        // Greetings and "what can you do" are answered by the greeting and help intents in intents.json.
         if (/^(how are you|how are you doing|whats up)$/.test(text)) return 'I’m here and ready to help. I can answer general questions, do simple calculations, or look up recorded crew data.';
         if (/^(who are you|what are you|what is orbit|what is orbitcare)$/.test(text)) return 'I’m ORBIT, the OrbitCare assistant. I can answer general spaceflight health questions from my local reference library, report available recorded data, and help with simple tasks. I cannot diagnose or replace the mission medical team.';
         if (/^(thank you|thanks|thank you very much)$/.test(text)) return 'You’re welcome!';
         if (/^(bye|goodbye|see you)$/.test(text)) return 'Goodbye. I’ll be here if you need help.';
-        if (/^(what can you do|help|what do you do)$/.test(text)) return 'I can answer general spaceflight health questions, report recorded crew data when available, and handle simple calculations and conversation. What would you like to try?';
         return null;
     }
 
@@ -305,8 +558,10 @@
 
     function respond(text, knowledge = {}, context = {}, snapshot = null, now = new Date()) {
         const k = { intents: [], topics: [], procedures: [], categories: [], disclaimer: '', ...knowledge };
-        const result = select(text, k, context);
-        const nextContext = result.intent === 'metric' ? { metric: result.entities.metric } : (result.intent === 'clarify' ? context : {});
+        const result = select(text, k, context, snapshot);
+        const nextContext = result.intent === 'metric'
+            ? { metric: result.entities.metric }
+            : (result.intent === 'region' && result.regions.length === 1 ? { region: result.regions[0] } : (result.intent === 'clarify' ? context : {}));
         let reply;
         let card = null;
         if (result.intent === 'smalltalk') {
@@ -317,6 +572,10 @@
             const procedure = k.procedures.find((item) => item.id === result.procedure);
             reply = emergencyReply(procedure, k.disclaimer);
             card = { type: 'emergency', title: procedure.title, steps: procedure.steps, escalate: procedure.escalate, source: procedure.source };
+        } else if (result.intent === 'region') {
+            ({ reply, card } = regionAnswer(result, snapshot, k.disclaimer));
+        } else if (result.intent === 'body_overview') {
+            reply = overviewReply(snapshot, k.disclaimer);
         } else if (result.intent === 'metric') {
             reply = metricResponse(result.entities.metric, snapshot, result.entities.time, text, now);
             card = metricCard(result.entities.metric, snapshot, result.entities.time, now);
