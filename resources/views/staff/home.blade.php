@@ -5,7 +5,7 @@
     @if ($isAdmin)
         <section class="oc-admin-hero mb-4" aria-labelledby="admin-overview-title">
             <div class="oc-admin-hero-copy">
-                <span class="oc-admin-kicker"><i class="bi bi-broadcast-pin" aria-hidden="true"></i> MISSION CONTROL</span>
+                <span class="oc-admin-kicker"><i class="bi bi-broadcast-pin" aria-hidden="true"></i> MISSION CONTROL · Administrator workspace</span>
                 <h2 id="admin-overview-title">Keep the mission<br>running smoothly.</h2>
                 <p>Manage access, shape the demo mission, and explore the evidence behind OrbitCare.</p>
                 <a class="btn btn-light" href="{{ route('admin.index') }}"><i class="bi bi-sliders" aria-hidden="true"></i> Open administration</a>
