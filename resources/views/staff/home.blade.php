@@ -10,10 +10,10 @@
                 <p>Manage access, shape the demo mission, and explore the evidence behind OrbitCare.</p>
                 <a class="btn btn-light" href="{{ route('admin.index') }}"><i class="bi bi-sliders" aria-hidden="true"></i> Open administration</a>
             </div>
-            <div class="oc-orbit-art" aria-hidden="true">
-                <span class="oc-orbit oc-orbit-one"></span><span class="oc-orbit oc-orbit-two"></span>
-                <span class="oc-orbit oc-orbit-three"></span><span class="oc-orbit-planet"><i class="bi bi-globe-americas"></i></span>
-                <span class="oc-orbit-satellite"><i class="bi bi-satellite"></i></span>
+            <div class="oc-admin-orbit-art" aria-hidden="true">
+                <span class="oc-admin-orbit oc-admin-orbit-one"></span><span class="oc-admin-orbit oc-admin-orbit-two"></span>
+                <span class="oc-admin-orbit oc-admin-orbit-three"></span><span class="oc-admin-orbit-planet"><i class="bi bi-globe-americas"></i></span>
+                <span class="oc-admin-orbit-satellite"><i class="bi bi-satellite"></i></span>
             </div>
         </section>
 

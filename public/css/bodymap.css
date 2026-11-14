@@ -23,7 +23,141 @@
     --bm-focus: #60a5fa;
 }
 
+:is([data-bs-theme="dark"], [data-theme="dark"], [data-theme="night"], .theme-night, .night) .bm-figure.bm-modern {
+    --bm-nominal: #34d399;
+    --bm-watch: #a5b4fc;
+    --bm-review: #fbbf24;
+    --bm-urgent: #fb7185;
+    --bm-skin-fill: #14233a;
+    --bm-skin-stroke: #7890b2;
+    --bm-deco: #7186a8;
+    --bm-glyph: #071426;
+}
+
 .bm-stage { position: relative; }
+
+/* Modern presentation; the Classic view toggle restores the original palette. */
+.bm-figure.bm-modern {
+    --bm-nominal: #34d399;
+    --bm-watch: #a5b4fc;
+    --bm-review: #fbbf24;
+    --bm-urgent: #fb7185;
+    --bm-skin-fill: #14233a;
+    --bm-skin-stroke: #7890b2;
+    --bm-deco: #7186a8;
+    --bm-glyph: #071426;
+    border: 1px solid rgba(100, 149, 237, .22);
+    border-radius: 1rem;
+    background: radial-gradient(ellipse at 50% 42%, rgba(37, 99, 235, .14), transparent 48%),
+                linear-gradient(160deg, #0b1324, #101d32 65%, #0c1628);
+    box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 50px rgba(2, 8, 23, .16);
+}
+.bm-figure.bm-modern .bm-svg { filter: drop-shadow(0 0 16px rgba(52, 211, 153, .08)); }
+.bm-figure.bm-modern .bm-region[data-region="skin"] :is(path, ellipse) {
+    fill: #152640;
+    fill-opacity: .32;
+    stroke: #8298b8;
+    stroke-width: 1.5;
+}
+.bm-figure.bm-modern .bm-region[data-region="skin"]:hover :is(path, ellipse) { fill-opacity: .48; }
+.bm-figure.bm-modern .bm-region:not([data-region="skin"]) :is(path, ellipse, circle) {
+    fill-opacity: .25;
+    stroke-width: 1.65;
+}
+.bm-figure.bm-modern .bm-region.is-selected :is(path, ellipse, circle) {
+    fill-opacity: .52;
+    stroke-width: 2.8;
+}
+.bm-figure.bm-modern .bm-line { filter: drop-shadow(0 0 4px var(--st)); }
+.bm-figure.bm-modern .bm-deco { stroke: #91a7c7; }
+.bm-figure.bm-modern .bm-region[data-status="nominal"] { filter: drop-shadow(0 0 3px rgba(52,211,153,.42)); }
+.bm-figure.bm-modern .bm-region[data-status="review"] { filter: drop-shadow(0 0 4px rgba(251,191,36,.38)); }
+.bm-figure.bm-modern .bm-region[data-status="urgent"] { filter: drop-shadow(0 0 5px rgba(251,113,133,.48)); }
+.bm-figure.bm-modern .bm-region[data-region="skin"] { filter: none; }
+.bm-figure.bm-modern .btn-group .btn, .bm-figure.bm-modern [data-action="reset-view"] { backdrop-filter: blur(8px); }
+
+/* Friendly illustrated anatomy treatment for the Modern view. */
+.bm-figure.bm-modern {
+    --bm-nominal: #53d89a;
+    --bm-watch: #aab9d2;
+    --bm-review: #f2b84b;
+    --bm-urgent: #f06f83;
+    --bm-skin-fill: #f2c4a0;
+    --bm-skin-stroke: #ffd9b9;
+    --bm-deco: #ffe0bb;
+}
+.bm-figure.bm-modern .bm-region[data-region="skin"] :is(path, ellipse) {
+    fill: #eab895; fill-opacity: .22; stroke: #ffd5b3; stroke-width: 2;
+}
+.bm-figure.bm-modern .bm-region[data-layer="muscle"] :is(path, ellipse, circle) {
+    fill: #ef8e84; fill-opacity: .27; stroke: #ffb2a3;
+}
+.bm-figure.bm-modern .bm-region[data-layer="skeleton"] :is(path, ellipse, circle) {
+    fill: #f7e6bd; fill-opacity: .46; stroke: #fff0cb;
+}
+.bm-figure.bm-modern .bm-region[data-region="spine"] .bm-line,
+.bm-figure.bm-modern .bm-region[data-region="long-bones"] .bm-line {
+    stroke: #ffe9bb; stroke-width: 7; filter: drop-shadow(0 1px 2px rgba(255,214,153,.5));
+}
+.bm-figure.bm-modern .bm-region[data-region="lungs"] :is(path, ellipse) { fill: #f08b94; stroke: #ffb2b5; }
+.bm-figure.bm-modern .bm-region[data-region="heart"] :is(path, ellipse) { fill: #f05d73; stroke: #ffadb4; }
+.bm-figure.bm-modern .bm-region[data-region="digestive"] :is(path, ellipse) { fill: #e8ad69; stroke: #ffd19a; }
+.bm-figure.bm-modern .bm-region[data-region="head"] :is(path, ellipse) { fill: #f3cf83; stroke: #ffe7ae; }
+.bm-figure.bm-modern .bm-region[data-region="eyes"] :is(path, ellipse, circle) { fill: #74dfd2; stroke: #c4fff2; }
+.bm-figure.bm-modern .bm-region[data-region="eyes"] .bm-pupil { fill: #173047; }
+.bm-figure.bm-modern .bm-deco { stroke: rgba(255, 231, 201, .85); stroke-width: 1.5; }
+.bm-figure.bm-modern .bm-region[data-status="nominal"] { filter: none; }
+.bm-figure.bm-modern .bm-region[data-status="review"],
+.bm-figure.bm-modern .bm-region[data-status="urgent"] { filter: drop-shadow(0 0 4px var(--st)); }
+
+/* Keep the illustration in the same color mode as the surrounding page. */
+:root[data-theme="day"] .bm-figure.bm-modern,
+:root:not([data-theme="night"]) .bm-figure.bm-modern {
+    --bm-nominal: #16875a;
+    --bm-watch: #64748b;
+    --bm-review: #a65d08;
+    --bm-urgent: #c43e55;
+    border-color: #d9e2ef;
+    background: radial-gradient(ellipse at 50% 40%, rgba(191, 219, 254, .5), transparent 50%),
+                linear-gradient(160deg, #f6f9ff, #edf3fb 68%, #f8faff);
+    box-shadow: inset 0 1px #fff, 0 12px 32px rgba(31, 55, 88, .1);
+}
+:root[data-theme="day"] .bm-figure.bm-modern .bm-region[data-region="skin"] :is(path, ellipse),
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-region[data-region="skin"] :is(path, ellipse) {
+    fill: #f3c9a9; fill-opacity: .34; stroke: #c88d69;
+}
+:root[data-theme="day"] .bm-figure.bm-modern .bm-region[data-layer="muscle"] :is(path, ellipse, circle),
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-region[data-layer="muscle"] :is(path, ellipse, circle) {
+    fill: #e98d83; fill-opacity: .35; stroke: #c76465;
+}
+:root[data-theme="day"] .bm-figure.bm-modern .bm-region[data-layer="skeleton"] :is(path, ellipse, circle),
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-region[data-layer="skeleton"] :is(path, ellipse, circle) {
+    fill: #b68b50; fill-opacity: .35; stroke: #806139;
+}
+:root[data-theme="day"] .bm-figure.bm-modern .bm-region[data-region="spine"] .bm-line,
+:root[data-theme="day"] .bm-figure.bm-modern .bm-region[data-region="long-bones"] .bm-line,
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-region[data-region="spine"] .bm-line,
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-region[data-region="long-bones"] .bm-line {
+    stroke: #9b7444; filter: drop-shadow(0 1px 2px rgba(114, 82, 42, .22));
+}
+:root[data-theme="day"] .bm-figure.bm-modern .bm-deco,
+:root:not([data-theme="night"]) .bm-figure.bm-modern .bm-deco { stroke: #947b64; }
+
+:root[data-theme="night"] .bm-figure.bm-modern {
+    --bm-nominal: #53d89a;
+    --bm-watch: #aab9d2;
+    --bm-review: #f2b84b;
+    --bm-urgent: #f06f83;
+    border-color: rgba(100, 149, 237, .22);
+    background: radial-gradient(ellipse at 50% 42%, rgba(37, 99, 235, .14), transparent 48%),
+                linear-gradient(160deg, #0b1324, #101d32 65%, #0c1628);
+    box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 50px rgba(2, 8, 23, .16);
+}
+:root[data-theme="night"] .bm-figure.bm-modern .bm-region[data-region="skin"] :is(path, ellipse) { fill: #eab895; stroke: #ffd5b3; }
+:root[data-theme="night"] .bm-figure.bm-modern .bm-region[data-layer="skeleton"] :is(path, ellipse, circle) { fill: #f7e6bd; stroke: #fff0cb; }
+:root[data-theme="night"] .bm-figure.bm-modern .bm-region[data-region="spine"] .bm-line,
+:root[data-theme="night"] .bm-figure.bm-modern .bm-region[data-region="long-bones"] .bm-line { stroke: #ffe9bb; }
+:root[data-theme="night"] .bm-figure.bm-modern .bm-deco { stroke: rgba(255, 231, 201, .85); }
 
 .bm-svg {
     display: block;

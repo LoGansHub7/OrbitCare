@@ -20,7 +20,7 @@
 @else
 <div class="row g-3" data-bodymap-root data-api="{{ route('body-map.api.all') }}">
     <div class="col-lg-5">
-        <div class="card bm-figure" data-view="front" data-bodymap-figure>
+        <div class="card bm-figure bm-modern" data-view="front" data-bodymap-figure>
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
                     <div class="btn-group btn-group-sm" role="group" aria-label="Body view">
@@ -39,6 +39,9 @@
 
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-action="reset-view">
                         <i class="bi bi-arrows-angle-contract" aria-hidden="true"></i> Reset view
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-action="toggle-style" aria-pressed="true">
+                        <i class="bi bi-stars" aria-hidden="true"></i> Modern view
                     </button>
                 </div>
 

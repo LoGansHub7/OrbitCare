@@ -104,6 +104,9 @@
     function select(text, knowledge, context = {}) {
         const normalized = normalize(text);
         const entities = extract(text);
+        if (isBasicArithmetic(text)) return { intent: 'arithmetic', confidence: 1, entities };
+        const chat = basicConversation(normalized);
+        if (chat) return { intent: 'smalltalk', response: chat, confidence: 1, entities };
         const procedure = findProcedure(normalized, knowledge.procedures);
         if (procedure) return { intent: 'emergency', procedure: procedure.id, confidence: 1, entities };
         if (/\b(?:alerts?|warnings?|flags?)\b/.test(normalized)) return { intent: 'alerts', confidence: 1, entities };
@@ -143,12 +146,48 @@
         return { ...winner, entities };
     }
 
+    function basicConversation(text) {
+        if (/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(text)) return 'Hello! What can I help you with? I can answer general questions, do simple calculations, and report recorded crew data.';
+        if (/^(how are you|how are you doing|whats up)$/.test(text)) return 'I’m here and ready to help. I can answer general questions, do simple calculations, or look up recorded crew data.';
+        if (/^(who are you|what are you|what is orbit|what is orbitcare)$/.test(text)) return 'I’m ORBIT, the OrbitCare assistant. I can answer general spaceflight health questions from my local reference library, report available recorded data, and help with simple tasks. I cannot diagnose or replace the mission medical team.';
+        if (/^(thank you|thanks|thank you very much)$/.test(text)) return 'You’re welcome!';
+        if (/^(bye|goodbye|see you)$/.test(text)) return 'Goodbye. I’ll be here if you need help.';
+        if (/^(what can you do|help|what do you do)$/.test(text)) return 'I can answer general spaceflight health questions, report recorded crew data when available, and handle simple calculations and conversation. What would you like to try?';
+        return null;
+    }
+
+    function isBasicArithmetic(text) {
+        return /^(?:(?:what is|what's|calculate)\s+)?\d+(?:\.\d+)?\s*(?:\+|plus|add|minus|subtract|\-|\*|×|times|x|\/|÷|divided by)\s*\d+(?:\.\d+)?\??$/i.test(String(text).trim());
+    }
+
+    function solveBasicArithmetic(text) {
+        const match = String(text).trim().match(/^(?:(?:what is|what's|calculate)\s+)?(\d+(?:\.\d+)?)\s*(\+|plus|add|minus|subtract|\-|\*|×|times|x|\/|÷|divided by)\s*(\d+(?:\.\d+)?)\??$/i);
+        if (!match) return null;
+        const a = Number(match[1]);
+        const b = Number(match[3]);
+        const op = match[2].toLowerCase();
+        const result = ['+', 'plus', 'add'].includes(op) ? a + b
+            : ['-', 'minus', 'subtract'].includes(op) ? a - b
+                : ['*', '×', 'times', 'x'].includes(op) ? a * b
+                    : b === 0 ? null : a / b;
+        return result === null ? 'Division by zero is undefined.' : `${a} ${op} ${b} = ${Number(result.toPrecision(10))}`;
+    }
+
     function metricResponse(metricId, snapshot, time, text, now) {
         const metric = metrics.find((item) => item.id === metricId);
         if (!metric) return 'I cannot identify that metric. Please choose another topic.';
         if (time && !['latest', 'today'].includes(time)) return `I only have the latest cached snapshot, not ${time.replace('_', ' ')} history for ${metric.label}. Check your records or ask the mission medical team.`;
         if (/\b(?:why|high|low)\b/.test(normalize(text))) return `I cannot determine why ${metric.label} may have changed or whether it is high or low. Review the data with your mission medical team.`;
         if (!snapshot) return 'No personal snapshot is available on this device. Connect while signed in to refresh it.';
+        if (metricId === 'radiation_dose_sim') {
+            const radiation = snapshot.radiation;
+            if (!radiation || !radiation.recorded_at) return 'No radiation dose value is available in your cached snapshot. Connect while signed in to refresh your recorded data.';
+            const recorded = new Date(radiation.recorded_at);
+            if (Number.isNaN(recorded.getTime())) return 'The timestamp for your cached radiation reading is unavailable. Check your records.';
+            const stale = now.getTime() - recorded.getTime() > 24 * 3600000;
+            const simulated = radiation.is_simulated ? ' This is simulated demonstration data.' : '';
+            return `Your latest recorded radiation dose rate is ${radiation.dose_rate} mSv/day; cumulative dose is ${radiation.cumulative_dose} mSv, recorded ${recorded.toISOString()}.${stale ? ' This record is more than 24 hours old.' : ''}${simulated} This is recorded data only, not a safety assessment. Follow mission radiation procedures and ask the medical team to interpret it.`;
+        }
         if (metricId === 'blood_pressure') {
             const parts = ['blood_pressure_systolic', 'blood_pressure_diastolic'].map((code) =>
                 (snapshot.readings || []).find((item) => item.code === code));
@@ -270,7 +309,11 @@
         const nextContext = result.intent === 'metric' ? { metric: result.entities.metric } : (result.intent === 'clarify' ? context : {});
         let reply;
         let card = null;
-        if (result.intent === 'emergency') {
+        if (result.intent === 'smalltalk') {
+            reply = result.response;
+        } else if (result.intent === 'arithmetic') {
+            reply = solveBasicArithmetic(text);
+        } else if (result.intent === 'emergency') {
             const procedure = k.procedures.find((item) => item.id === result.procedure);
             reply = emergencyReply(procedure, k.disclaimer);
             card = { type: 'emergency', title: procedure.title, steps: procedure.steps, escalate: procedure.escalate, source: procedure.source };

@@ -398,6 +398,15 @@
             animateTo(FULL);
         });
 
+        const styleToggle = root.querySelector('[data-action="toggle-style"]');
+        styleToggle?.addEventListener('click', () => {
+            const modern = figure.classList.toggle('bm-modern');
+            styleToggle.setAttribute('aria-pressed', modern ? 'true' : 'false');
+            styleToggle.innerHTML = modern
+                ? '<i class="bi bi-stars" aria-hidden="true"></i> Modern view'
+                : '<i class="bi bi-diagram-3" aria-hidden="true"></i> Classic view';
+        });
+
         root.querySelectorAll('[data-region-trigger]').forEach((btn) => {
             btn.addEventListener('click', () => select(btn.dataset.slug));
         });

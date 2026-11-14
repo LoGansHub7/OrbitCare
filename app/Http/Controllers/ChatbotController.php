@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MetricDefinition;
+use App\Models\RadiationReading;
 use App\Services\AlertEvaluationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class ChatbotController extends Controller
     {
         $crew = $request->user()->crewProfile()->firstOrFail();
         $checkin = $crew->checkins()->latest('mission_date')->first();
+        $radiation = RadiationReading::query()->where('crew_profile_id', $crew->id)->latest('recorded_at')->first();
         $checkinFreshness = MetricDefinition::query()
             ->whereIn('code', ['sleep_duration', 'fatigue_rating', 'exercise_duration'])
             ->pluck('freshness_hours', 'code');
@@ -42,6 +44,14 @@ class ChatbotController extends Controller
             'captured_at' => now()->toIso8601String(),
             'rule_states' => app(AlertEvaluationService::class)->currentStates($crew),
             'readings' => $readings,
+            'radiation' => $radiation ? [
+                'dose_rate' => (float) $radiation->dose_rate,
+                'cumulative_dose' => (float) $radiation->cumulative_dose,
+                'neutron_dose' => $radiation->neutron_dose !== null ? (float) $radiation->neutron_dose : null,
+                'other_dose' => $radiation->other_dose !== null ? (float) $radiation->other_dose : null,
+                'recorded_at' => $radiation->recorded_at->toIso8601String(),
+                'is_simulated' => $radiation->is_simulated,
+            ] : null,
             'checkin' => $checkin ? [
                 'mission_date' => $checkin->mission_date->toDateString(),
                 'submitted_at' => $checkin->submitted_at->toIso8601String(),

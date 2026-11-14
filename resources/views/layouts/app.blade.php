@@ -61,7 +61,7 @@
 @endunless
 <script defer src="{{ asset('chatbot/store.js') }}"></script>
 <script defer src="{{ asset('chatbot/sync.js') }}"></script>
-<script defer src="{{ asset('chatbot/engine.js') }}"></script>
+<script defer src="{{ asset('chatbot/engine.js') }}?v={{ filemtime(public_path('chatbot/engine.js')) }}"></script>
 <script defer src="{{ asset('chatbot/assistant.js') }}"></script>
 @stack('scripts')
 </body>

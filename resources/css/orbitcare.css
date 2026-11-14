@@ -33,6 +33,12 @@
     --bs-table-color-state: var(--oc-text);
 }
 
+[data-theme="night"] .table {
+    --bs-table-color: var(--oc-text);
+    --bs-table-color-state: var(--oc-text);
+    --bs-table-bg: transparent;
+}
+
 body { background: var(--oc-bg); color: var(--oc-text); }
 .font-mono, .oc-metric, .oc-mono { font-family: var(--oc-mono); font-variant-numeric: tabular-nums; }
 
@@ -118,13 +124,13 @@ body { background: var(--oc-bg); color: var(--oc-text); }
 .oc-admin-hero h2 { margin:0 0 12px; font-size:clamp(1.8rem, 4vw, 2.7rem); font-weight:750; line-height:1.08; }
 .oc-admin-hero p { max-width:430px; color:#CBD5E1; margin-bottom:20px; }
 .oc-admin-hero .btn { color:#0F172A; }
-.oc-orbit-art { position:absolute; width:340px; height:280px; right:6%; top:50%; transform:translateY(-50%); }
-.oc-orbit { position:absolute; left:50%; top:50%; border:1px solid rgba(147,197,253,.36); border-radius:50%; transform:translate(-50%,-50%) rotate(-25deg); }
-.oc-orbit-one { width:300px; height:118px; }
-.oc-orbit-two { width:230px; height:230px; transform:translate(-50%,-50%) rotate(28deg) scaleY(.45); }
-.oc-orbit-three { width:330px; height:170px; transform:translate(-50%,-50%) rotate(55deg) scaleY(.55); }
-.oc-orbit-planet { position:absolute; left:50%; top:50%; display:grid; place-items:center; width:74px; height:74px; color:#BAE6FD; font-size:2rem; border-radius:50%; background:radial-gradient(circle at 32% 28%, #38BDF8, #2563EB 60%, #172554); box-shadow:0 0 45px rgba(56,189,248,.35); transform:translate(-50%,-50%); }
-.oc-orbit-satellite { position:absolute; left:14%; top:31%; color:#5EEAD4; font-size:1.35rem; }
+.oc-admin-orbit-art { position:absolute; width:340px; height:280px; right:6%; top:50%; transform:translateY(-50%); }
+.oc-admin-orbit { position:absolute; left:50%; top:50%; border:1px solid rgba(147,197,253,.36); border-radius:50%; transform:translate(-50%,-50%) rotate(-25deg); }
+.oc-admin-orbit-one { width:300px; height:118px; }
+.oc-admin-orbit-two { width:230px; height:230px; transform:translate(-50%,-50%) rotate(28deg) scaleY(.45); }
+.oc-admin-orbit-three { width:330px; height:170px; transform:translate(-50%,-50%) rotate(55deg) scaleY(.55); }
+.oc-admin-orbit-planet { position:absolute; left:50%; top:50%; display:grid; place-items:center; width:74px; height:74px; color:#BAE6FD; font-size:2rem; border-radius:50%; background:radial-gradient(circle at 32% 28%, #38BDF8, #2563EB 60%, #172554); box-shadow:0 0 45px rgba(56,189,248,.35); transform:translate(-50%,-50%); }
+.oc-admin-orbit-satellite { position:absolute; left:14%; top:31%; color:#5EEAD4; font-size:1.35rem; }
 .oc-admin-action { display:flex; flex-direction:column; height:100%; min-height:210px; padding:20px; color:var(--oc-text); text-decoration:none; background:var(--oc-card); border:1px solid var(--oc-border); border-radius:14px; transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .oc-admin-action:hover { color:var(--oc-text); border-color:#60A5FA; box-shadow:0 8px 22px rgba(37,99,235,.1); transform:translateY(-3px); }
 .oc-admin-action-icon { display:grid; place-items:center; width:42px; height:42px; margin-bottom:16px; color:#2563EB; background:#EFF6FF; border-radius:12px; font-size:1.2rem; }
@@ -137,7 +143,7 @@ body { background: var(--oc-bg); color: var(--oc-text); }
 .oc-admin-privacy > i { color:#0F766E; font-size:1.1rem; }
 [data-theme="night"] .oc-admin-privacy > i { color:#5EEAD4; }
 .oc-admin-privacy strong { color:var(--oc-text); }
-@media (max-width: 767.98px) { .oc-orbit-art { right:-155px; opacity:.46; } .oc-admin-hero-copy { max-width:80%; } }
+@media (max-width: 767.98px) { .oc-admin-orbit-art { right:-155px; opacity:.46; } .oc-admin-hero-copy { max-width:80%; } }
 .oc-skeleton { min-height: 1em; border-radius:6px; background:linear-gradient(90deg, var(--oc-border), var(--oc-card), var(--oc-border)); background-size:200% 100%; animation: oc-loading 1.2s infinite; }
 @keyframes oc-loading { to { background-position:-200% 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
