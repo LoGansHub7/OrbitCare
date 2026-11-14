@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "questions": [
+    {"question": "How do I stop feeling dizzy when I stand up?", "topic": "cardio_orthostatic"},
+    {"question": "Why is my face puffy?", "topic": "cardio_fluid_shift"},
+    {"question": "How do I protect my bones?", "topic": "bone_loss"},
+    {"question": "What exercise should I do?", "topic": "muscle_countermeasures"},
+    {"question": "Am I exposed to radiation?", "topic": "radiation_exposure"},
+    {"question": "How can I sleep better in orbit?", "topic": "sleep_circadian"},
+    {"question": "What helps space motion sickness?", "topic": "space_motion_sickness"},
+    {"question": "My vision is blurry. What should I do?", "topic": "vision_sans"},
+    {"question": "How do I cope with stress?", "topic": "mental_stress"},
+    {"question": "How do I deal with crew conflict?", "topic": "mental_isolation"},
+    {"question": "What should I eat?", "topic": "nutrition_food"},
+    {"question": "How much water should I drink?", "topic": "hydration_guidance"},
+    {"question": "How do I avoid infection?", "topic": "infection_hygiene"},
+    {"question": "How do I treat a small cut?", "topic": "minor_injury_first_aid"},
+    {"question": "Why do I have headaches?", "topic": "cabin_co2"},
+    {"question": "I feel unwell. What should I do?", "topic": "symptom_general"}
+  ]
+}

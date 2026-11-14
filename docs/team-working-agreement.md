@@ -79,6 +79,9 @@ Do not duplicate daily check-in values into `health_readings`. Plausibility boun
 | GET | `/exports/my-health-data.csv` | `exports.self` | Astronaut; own records | Personal export |
 | GET | `/staff/crew/{crewProfileId}/health-data.csv` | `exports.assigned` | Medical officer; assigned crew only | Crew export |
 | GET | `/research` | `research.index` | Authenticated | Research and limits |
+| GET | `/chatbot/session` | `chatbot.session` | Active astronaut only | Assistant sync |
+| GET | `/chatbot/snapshot` | `chatbot.snapshot` | Active astronaut; own records only | Assistant snapshot |
+| POST | `/chatbot/messages/sync` | `chatbot.sync` | Active astronaut; own messages only | Assistant sync |
 
 Future routes must have a named route, server-side authorisation, validation, and an owner/module entry here before frontend links are merged. Health-record queries must be scoped to the authenticated user or an explicitly authorised assignment; IDs in a URL never confer access.
 

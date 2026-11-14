@@ -1,0 +1,13 @@
+{
+  "name": "OrbitCare",
+  "short_name": "OrbitCare",
+  "description": "Offline foundation for the ORBIT assistant",
+  "start_url": "./chatbot/offline.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#091629",
+  "theme_color": "#091629",
+  "icons": [
+    { "src": "./chatbot/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

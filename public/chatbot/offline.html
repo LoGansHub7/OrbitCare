@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#091629">
+    <title>OrbitCare · Offline</title>
+    <link rel="manifest" href="../manifest.webmanifest">
+    <link rel="stylesheet" href="./assistant.css">
+    <script defer src="./store.js"></script>
+    <script defer src="./sync.js"></script>
+    <script defer src="./engine.js"></script>
+    <script defer src="./assistant.js"></script>
+</head>
+<body class="orbit-offline-page">
+    <main>
+        <img src="./icon.svg" width="72" height="72" alt="">
+        <p class="orbit-eyebrow">ORBITCARE / OFFLINE</p>
+        <h1>Connection interrupted</h1>
+        <p>ORBIT is available offline with limited functionality. Reconnect to access authenticated health pages and your personal chat history.</p>
+        <p>For health concerns, contact the mission medical team. ORBIT is not a medical service.</p>
+        <a href="../">Try OrbitCare again</a>
+    </main>
+    <div id="orbit-assistant" data-base="../">
+        <button class="orbit-launcher" type="button" aria-controls="orbit-panel" aria-expanded="false">
+            <img src="./icon.svg" alt="" width="42" height="42"><span>ORBIT <span class="orbit-dot" aria-hidden="true"></span></span>
+        </button>
+        <section id="orbit-panel" class="orbit-panel" hidden aria-labelledby="orbit-title">
+            <header class="orbit-header">
+                <img src="./icon.svg" alt="" width="46" height="46">
+                <div><h2 id="orbit-title">ORBIT</h2><p data-orbit-status role="status">Offline</p></div>
+                <button type="button" class="orbit-close" data-orbit-close aria-label="Close ORBIT">×</button>
+            </header>
+            <p class="orbit-notice">Experimental assistant. ORBIT does not replace your mission medical team.</p>
+            <div class="orbit-messages" data-orbit-messages aria-live="polite" aria-relevant="additions"></div>
+            <p class="orbit-error" data-orbit-error role="status" hidden></p>
+            <form class="orbit-form" data-orbit-form>
+                <label class="orbit-sr-only" for="orbit-input">Message ORBIT</label>
+                <input id="orbit-input" name="message" maxlength="4000" placeholder="Ask ORBIT…" required>
+                <button type="submit">Send</button>
+            </form>
+            <p class="orbit-privacy">Offline fallback: messages are temporary and not synced.</p>
+        </section>
+    </div>
+</body>
+</html>

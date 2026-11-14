@@ -1,0 +1,303 @@
+{
+  "version": 2,
+  "disclaimer": "ORBIT gives general information only. It supports astronauts and does not replace the mission flight surgeon or ground medical team, and it cannot diagnose or treat.",
+  "categories": [
+    {"id": "cardiovascular", "label": "Cardiovascular", "hazard": "Gravity fields (microgravity)"},
+    {"id": "bone_muscle", "label": "Bone and muscle", "hazard": "Gravity fields (microgravity)"},
+    {"id": "radiation", "label": "Radiation", "hazard": "Radiation"},
+    {"id": "sleep", "label": "Sleep", "hazard": "Isolation and confinement; hostile or closed environment"},
+    {"id": "vision", "label": "Vision and motion", "hazard": "Gravity fields (microgravity)"},
+    {"id": "mental", "label": "Mental wellness", "hazard": "Isolation and confinement; distance from Earth"},
+    {"id": "nutrition", "label": "Nutrition and hydration", "hazard": "Distance from Earth; hostile or closed environment"},
+    {"id": "infection_injury", "label": "Infection and minor injury", "hazard": "Hostile or closed environment"},
+    {"id": "symptoms", "label": "General symptoms", "hazard": "All hazards"},
+    {"id": "cabin_air", "label": "Cabin air", "hazard": "Hostile or closed environment"}
+  ],
+  "topics": [
+    {
+      "id": "cardio_fluid_shift",
+      "category": "cardiovascular",
+      "title": "Fluid shift and head fullness",
+      "phrases": ["fluid shift", "puffy face", "head fullness", "fluid redistribution", "facial puffiness"],
+      "answer": "In microgravity, body fluids move toward the head and chest. This can cause a puffy face, nasal congestion, a feeling of fullness in the head, and a reduced sense of thirst. Most people adapt within days, but the shift can affect blood pressure control when you return to standing.",
+      "steps": [
+        "Keep your assigned fluid and salt plan; do not restrict fluids.",
+        "Use any scheduled countermeasure session, such as lower-body negative pressure, as planned.",
+        "Move your head and neck gently and avoid abrupt head-down positions while symptoms are present.",
+        "Record any persistent headache, facial swelling, or vision change and when it started."
+      ],
+      "escalate": "A headache that persists or worsens, sudden vision change, or swelling that does not settle over several days.",
+      "source": "NASA Human Research Program (HRP): cardiovascular and fluid-shift risk; general spaceflight physiology."
+    },
+    {
+      "id": "cardio_orthostatic",
+      "category": "cardiovascular",
+      "title": "Dizziness when standing (orthostatic intolerance)",
+      "phrases": ["orthostatic", "standing up", "dizzy when standing", "dizzy when i stand up", "lightheaded when standing", "stand up slowly"],
+      "answer": "Orthostatic intolerance is lightheadedness or near-fainting when you stand up after time in microgravity or after returning to Earth gravity. Blood pressure control adjusts slowly to the fluid shift, so standing quickly can cause symptoms.",
+      "steps": [
+        "Stand up in stages: sit up, pause, then stand while holding a stable surface.",
+        "Keep up your fluid intake and follow your assigned countermeasure plan.",
+        "If you feel faint, sit or lie down at once and raise your legs.",
+        "Do not stand again until the symptoms have fully resolved, and tell the crew."
+      ],
+      "escalate": "Any episode of fainting, or repeated lightheadedness when standing. Call the medical team immediately if you lose consciousness.",
+      "source": "NASA HRP: cardiovascular and orthostatic intolerance research; return-to-gravity crew guidance."
+    },
+    {
+      "id": "cardio_heart_health",
+      "category": "cardiovascular",
+      "title": "Heart health in orbit",
+      "phrases": ["cardiovascular", "heart health", "cardiac", "heart in space", "cardiac deconditioning", "heart change in microgravity"],
+      "answer": "Without gravity loading, the heart can work less and cardiovascular fitness can decline over time. Heart rate and blood pressure trends are monitored so changes can be reviewed. A single reading varies; trends and context matter more.",
+      "steps": [
+        "Keep your scheduled aerobic exercise to maintain cardiovascular fitness.",
+        "Record heart rate and blood pressure at the times your protocol requires.",
+        "Note the activity, stress, or sleep that came before any unusual reading.",
+        "Report repeated readings outside your team's expected range rather than acting alone."
+      ],
+      "escalate": "Chest pain or pressure, palpitations that do not settle, fainting, or readings that your flight surgeon has asked you to report.",
+      "source": "NASA HRP: cardiovascular risk; spaceflight cardiovascular deconditioning literature."
+    },
+    {
+      "id": "bone_loss",
+      "category": "bone_muscle",
+      "title": "Bone loss and bone health",
+      "phrases": ["bone loss", "bone density", "osteoporosis", "bones weaken", "bone"],
+      "answer": "Weight-bearing bones lose density in microgravity. Commonly cited losses are roughly 1 to 1.5 percent per month in some bones without countermeasures. Resistance exercise and loading help slow the loss, and bone health is monitored during and after the mission.",
+      "steps": [
+        "Complete your scheduled resistance exercise, including any loading device sessions assigned to you.",
+        "Keep protein, calcium, and vitamin D intake to the levels in your nutrition plan.",
+        "Report new back, hip, or leg pain that gets worse with loading.",
+        "Record any fall, impact, or unusual bone pain with the date and time."
+      ],
+      "escalate": "Sharp or localised bone pain, pain that lasts, any suspected fracture, or pain after an impact.",
+      "source": "NASA HRP: injurious bone fracture risk; ISS bone-density studies."
+    },
+    {
+      "id": "muscle_countermeasures",
+      "category": "bone_muscle",
+      "title": "Exercise countermeasures for muscle and fitness",
+      "phrases": ["exercise", "muscle loss", "muscle atrophy", "exercise countermeasure", "treadmill", "cycle ergometer", "resistance exercise"],
+      "answer": "Muscles weaken without gravity loading, so daily exercise is the main countermeasure. Resistance training, such as the Advanced Resistive Exercise Device (ARED), protects strength, and treadmill or cycle sessions protect aerobic fitness. Intensity and duration are individualised, so follow your assigned prescription.",
+      "steps": [
+        "Complete your full assigned routine, including resistance and aerobic sessions.",
+        "Use the treadmill harness and cycle settings as configured by the ground team.",
+        "Warm up and cool down. Stop if you feel chest pain, severe breathlessness, or sharp joint pain.",
+        "Log completed sessions and any equipment faults in the exercise log."
+      ],
+      "escalate": "Joint or muscle injury during exercise, chest discomfort, severe breathlessness, or pain that does not improve after rest.",
+      "source": "NASA HRP: muscle and exercise countermeasures; ISS exercise protocols (ARED, treadmill, cycle ergometer)."
+    },
+    {
+      "id": "radiation_exposure",
+      "category": "radiation",
+      "title": "Radiation exposure and shielding",
+      "phrases": ["radiation", "cosmic rays", "solar particle event", "solar flare", "shielding", "dosimeter"],
+      "answer": "Crews receive cosmic radiation continuously and may face higher exposure during solar particle events. Personal dosimeters track exposure. The main spaceflight radiation risks are long-term, and they are managed through shielding, mission planning, and dose limits. Acute symptoms are not expected at typical mission doses.",
+      "steps": [
+        "Wear your personal dosimeter at all times, including during extravehicular activity.",
+        "During a solar particle event alert, move to the planned shelter area and follow the crew procedure.",
+        "Record any alarm and the time it sounded.",
+        "Report unusual symptoms, such as nausea, vomiting, or unexplained fatigue, with the time they began."
+      ],
+      "escalate": "Any alarm you cannot explain, dosimeter readings above the crew alert level, or acute symptoms such as nausea, vomiting, or unexplained fatigue after an event.",
+      "source": "NASA HRP: acute and chronic radiation damage risk; crew radiation protection procedures."
+    },
+    {
+      "id": "sleep_circadian",
+      "category": "sleep",
+      "title": "Sleep and circadian rhythm in orbit",
+      "phrases": ["sleep", "circadian", "insomnia", "sleep schedule", "sleep in orbit", "rest"],
+      "answer": "Microgravity, altered light cycles, noise, and workload can disrupt sleep and the circadian rhythm. Poor sleep reduces performance and mood. A consistent sleep schedule, planned light exposure, and a quiet sleep station help most.",
+      "steps": [
+        "Keep a consistent sleep and wake schedule, even on busy days.",
+        "Follow the planned lighting schedule and avoid bright screens just before sleep.",
+        "Use sleep aids only as prescribed by the flight surgeon.",
+        "Record sleep duration and quality each day so trends can be reviewed."
+      ],
+      "escalate": "Several nights of poor sleep in a row, sleep problems that affect performance or safety, or any new need for sleep medication.",
+      "source": "NASA HRP: risk of impaired sleep and circadian rhythm; ISS sleep and lighting studies."
+    },
+    {
+      "id": "space_motion_sickness",
+      "category": "vision",
+      "title": "Space motion sickness",
+      "phrases": ["space motion sickness", "motion sickness", "space sickness", "motion sick", "space sickness nausea"],
+      "answer": "Space motion sickness (SMS) often occurs in the first days of flight. It can cause nausea, vomiting, headache, fatigue, and drowsiness. It usually settles within a few days as the vestibular system adapts to microgravity.",
+      "steps": [
+        "Move your head slowly and keep head movements still during rapid motion.",
+        "When nausea starts, fix your eyes on a stable point in the cabin.",
+        "Eat small, bland meals and sip water.",
+        "Use anti-nausea medication only if it is prescribed and recorded."
+      ],
+      "escalate": "Vomiting that stops you keeping fluids down, signs of dehydration, symptoms lasting more than about a week, or dizziness with weakness, numbness, or speech changes (treat the last as an emergency).",
+      "source": "NASA HRP: vestibular and sensorimotor adaptation; space motion sickness experience on the ISS."
+    },
+    {
+      "id": "vision_sans",
+      "category": "vision",
+      "title": "Vision changes (SANS)",
+      "phrases": ["vision changes", "vision", "blurred vision", "sans", "eye pressure", "neuro ocular"],
+      "answer": "Spaceflight-associated neuro-ocular syndrome (SANS) can cause vision changes such as blurred vision, folds in the back of the eye, and swelling of the optic nerve. It may be linked to fluid shifts and pressure around the brain and eyes. Some changes can persist after flight, so vision is monitored.",
+      "steps": [
+        "Complete vision tests and eye imaging as scheduled, using the same conditions each time.",
+        "Report blurred vision, changes in near or far focus, or loss of side vision promptly.",
+        "Keep your eye-pressure or ocular imaging appointments.",
+        "Do not change your eyewear prescription on your own without guidance."
+      ],
+      "escalate": "Sudden vision loss, double vision, eye pain, or a new headache with any vision change.",
+      "source": "NASA HRP: spaceflight-associated neuro-ocular syndrome (SANS) risk."
+    },
+    {
+      "id": "mental_stress",
+      "category": "mental",
+      "title": "Stress and coping",
+      "phrases": ["stress", "stressed", "anxiety", "anxious", "coping", "worried"],
+      "answer": "Stress in orbit can come from workload, confinement, time pressure, and separation from family. Simple coping strategies help: structured routines, slow breathing, planned time with family, and talking with your crew or support team.",
+      "steps": [
+        "Try slow breathing: breathe in for four counts and out for six, for about two minutes.",
+        "Break large tasks into short steps and take the planned breaks.",
+        "Schedule private time and contact with family or friends.",
+        "Talk to the psychological support team or flight surgeon about stress that continues."
+      ],
+      "escalate": "Stress lasting more than a few weeks, loss of sleep or appetite, panic episodes, or any thoughts of harming yourself or others (contact the team immediately).",
+      "source": "NASA HRP: behavioral health and performance risk; crew psychological support guidance."
+    },
+    {
+      "id": "mental_isolation",
+      "category": "mental",
+      "title": "Isolation, confinement, and crew conflict",
+      "phrases": ["isolation", "lonely", "loneliness", "confinement", "crew conflict", "homesick", "conflict", "lonely and stressed"],
+      "answer": "Isolation and confinement can lead to loneliness, irritability, and tension within the crew. These reactions are common. Regular communication, shared activities, and an agreed process for resolving disagreements reduce the risk.",
+      "steps": [
+        "Keep your scheduled private calls and messages with family and friends.",
+        "Plan shared meals or activities with crew members.",
+        "Address disagreements early, calmly, and privately, using the agreed conflict process.",
+        "Ask the support team for help if the situation does not improve."
+      ],
+      "escalate": "Loneliness with hopelessness that persists, conflict you cannot resolve, or any threat to safety.",
+      "source": "NASA HRP: isolation and confinement behavioral health risk; ISS crew-support practices."
+    },
+    {
+      "id": "mental_low_mood",
+      "category": "mental",
+      "title": "Low mood or depression",
+      "phrases": ["low mood", "depression", "depressed", "hopeless", "sad", "feel down"],
+      "answer": "Low mood, hopelessness, or depression should be taken seriously and raised promptly with a human member of the support team. ORBIT can share general coping ideas, but it cannot assess risk.",
+      "steps": [
+        "Tell the flight surgeon or psychological support team today.",
+        "Stay with or near a crew member until you have spoken with someone.",
+        "Keep a simple record of mood and sleep to share with the team.",
+        "Use the coping techniques in your mission materials while you wait for support."
+      ],
+      "escalate": "Immediately, if you have any thoughts of self-harm or harming others, or if you feel unable to keep yourself safe.",
+      "source": "NASA HRP: behavioral health; NASA and CSA psychological support guidance."
+    },
+    {
+      "id": "nutrition_food",
+      "category": "nutrition",
+      "title": "Food and nutrition",
+      "phrases": ["nutrition", "food", "diet", "eating", "appetite", "meal"],
+      "answer": "Food supports immune function, bone and muscle health, and energy. Taste and appetite can change in orbit, and the menu is planned to meet nutrient targets. Eat your assigned meals and report persistent appetite loss.",
+      "steps": [
+        "Eat planned meals, including breakfast, to keep energy and mood steady.",
+        "Choose menu items and supplements from your nutrition plan.",
+        "Log meals you skip or cannot finish.",
+        "Tell the team if food texture or taste causes problems."
+      ],
+      "escalate": "Loss of appetite lasting more than a couple of days, weight loss, vomiting, or signs of a nutrient deficiency.",
+      "source": "NASA HRP: risk of inadequate food and nutrition; ISS food system guidance."
+    },
+    {
+      "id": "hydration_guidance",
+      "category": "nutrition",
+      "title": "Hydration",
+      "phrases": ["hydration", "water intake", "dehydrated", "thirst", "drink water"],
+      "answer": "Fluid balance changes in microgravity, and fluid is lost through sweat, breath, and urine. Even mild dehydration can cause headache, dizziness, and fatigue. Follow your hydration plan and check urine colour only when guided to do so.",
+      "steps": [
+        "Drink your assigned water volume across the day rather than all at once.",
+        "Hydrate before and after exercise.",
+        "Sip water when you notice a headache, dizziness, or a dry mouth.",
+        "Record intake when your protocol requires it."
+      ],
+      "escalate": "Very dark or greatly reduced urine output, persistent dizziness, dry mouth with weakness, or being unable to keep fluids down.",
+      "source": "NASA HRP: fluid balance and nutrition; spaceflight hydration studies."
+    },
+    {
+      "id": "weight_management",
+      "category": "nutrition",
+      "title": "Weight and body mass",
+      "phrases": ["weight", "weight loss", "weight gain", "body mass", "weight management"],
+      "answer": "Body weight can change in flight because of fluid shift, appetite changes, and muscle loss. Weight is tracked to monitor nutrition and health, not as a goal in itself. Changes should be reviewed with the medical team.",
+      "steps": [
+        "Weigh yourself on the schedule set by the team, at the same time of day.",
+        "Keep to your meal plan and exercise routine.",
+        "Report sudden or large weight changes with the date.",
+        "Do not restrict food to change your weight without team approval."
+      ],
+      "escalate": "Unexplained weight loss, weight loss with vomiting or appetite loss, or weight gain with swelling.",
+      "source": "NASA HRP: nutrition and body mass monitoring; crew medical data practices."
+    },
+    {
+      "id": "infection_hygiene",
+      "category": "infection_injury",
+      "title": "Infection risk and hygiene",
+      "phrases": ["infection", "hygiene", "germs", "hand washing", "contamination", "bacteria"],
+      "answer": "Closed environments can spread infection, and immune function can be lower in spaceflight. Good hygiene protects you and the crew: hand washing, cleaning shared surfaces, and keeping wounds covered.",
+      "steps": [
+        "Wash or sanitise your hands before eating and after using shared equipment.",
+        "Clean shared surfaces and equipment with the approved wipes.",
+        "Cover coughs and sneezes, and stay away from shared food if you are unwell.",
+        "Report fever, cough, or a rash to the crew medical officer."
+      ],
+      "escalate": "Fever, redness that spreads, pus, a spreading rash, or infection symptoms that get worse or do not improve.",
+      "source": "NASA HRP: microbial and infection risk in closed environments; ISS microbial monitoring."
+    },
+    {
+      "id": "minor_injury_first_aid",
+      "category": "infection_injury",
+      "title": "Minor injuries and first aid",
+      "phrases": ["injury", "cut", "burn", "bruise", "first aid", "wound", "laceration"],
+      "answer": "Minor injuries such as cuts, burns, and bruises can be treated with the onboard medical kit. Protect yourself, control bleeding with pressure, clean the wound, and keep it covered. Document every injury and treatment.",
+      "steps": [
+        "Wear gloves and wash your hands before treating a wound.",
+        "For a cut, apply firm pressure with sterile gauze until bleeding stops, then clean and cover it.",
+        "For a burn, cool it with cool water if it is available, then cover it with a sterile dressing.",
+        "Document the injury, the treatment, and the time in the medical log."
+      ],
+      "escalate": "Bleeding that will not stop, deep or large wounds, burns larger than your palm, signs of infection, or any suspected fracture.",
+      "source": "General first-aid principles; follow the onboard medical kit procedures and the crew medical officer."
+    },
+    {
+      "id": "symptom_general",
+      "category": "symptoms",
+      "title": "General symptoms",
+      "phrases": ["pain", "headache", "head hurts", "dizzy", "dizziness", "nausea", "sick", "unwell", "feel ill", "symptom", "tired and weak", "feel tired"],
+      "answer": "ORBIT cannot diagnose symptoms, but general guidance can help you prepare for a conversation with the medical team. Note what you feel, when it started, how severe it is, and what makes it better or worse.",
+      "steps": [
+        "Write down the symptom, when it started, its severity, and what changes it.",
+        "Rest, hydrate, and avoid strenuous activity until you have spoken with the medical team.",
+        "Check your recent sleep, fluid intake, and cabin air conditions.",
+        "Contact the crew medical officer through the normal channel."
+      ],
+      "escalate": "Any chest pain, severe breathing difficulty, fainting, severe bleeding, sudden weakness, or confusion (use the emergency procedures). Any symptom that is severe, new, or getting worse.",
+      "source": "General medical triage principles; mission medical team guidance."
+    },
+    {
+      "id": "cabin_co2",
+      "category": "cabin_air",
+      "title": "Carbon dioxide and cabin air",
+      "phrases": ["co2", "carbon dioxide", "cabin air", "stuffy", "air quality", "ventilation"],
+      "answer": "Elevated carbon dioxide (CO2) can cause headache, dizziness, fatigue, irritability, and poor concentration. It can signal a ventilation or CO2 removal problem in the cabin. Improving ventilation and checking the air system are the first steps.",
+      "steps": [
+        "Check whether a CO2 or air-quality alarm is active and follow the alarm procedure.",
+        "Increase ventilation and move to an area with better airflow if it is safe to do so.",
+        "Rest and drink water while the air is checked.",
+        "Report the symptoms, the time, and the location to the crew and the ground team."
+      ],
+      "escalate": "Symptoms that do not improve after ventilation, confusion, breathlessness, or loss of consciousness (treat the last two as an emergency).",
+      "source": "NASA HRP: hostile and closed environment risk; atmospheric contaminant and CO2 management."
+    }
+  ]
+}

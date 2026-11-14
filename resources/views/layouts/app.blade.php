@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'OrbitCare') · OrbitCare</title>
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <link rel="stylesheet" href="{{ asset('chatbot/assistant.css') }}">
     @vite(['resources/js/app.js'])
 </head>
 <body>
@@ -54,6 +56,13 @@
         </main>
     </div>
 </div>
+@unless (request()->routeIs('assistant.show'))
+<x-orbit-assistant />
+@endunless
+<script defer src="{{ asset('chatbot/store.js') }}"></script>
+<script defer src="{{ asset('chatbot/sync.js') }}"></script>
+<script defer src="{{ asset('chatbot/engine.js') }}"></script>
+<script defer src="{{ asset('chatbot/assistant.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

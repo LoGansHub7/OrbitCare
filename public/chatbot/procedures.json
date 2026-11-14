@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "disclaimer": "These are general red-flag responses. Follow the crew medical training and the onboard procedures; ORBIT does not replace emergency medical care.",
+  "procedures": [
+    {
+      "id": "chest_pain",
+      "title": "Chest pain or pressure",
+      "triggers": ["chest pain", "chest tightness", "pain in my chest", "crushing chest", "heart attack"],
+      "steps": [
+        "Stop all activity and stay where you are. Sit or lie down in a secure position.",
+        "Alert the crew now and call the flight surgeon or ground medical team on the emergency channel.",
+        "Start the crew medical officer's procedure. Do not treat beyond your training.",
+        "Keep watching breathing and responsiveness, and note the time the symptoms began."
+      ],
+      "escalate": "Immediately. Chest pain is always treated as an emergency.",
+      "source": "General emergency medical principles; follow the mission's approved onboard medical procedures."
+    },
+    {
+      "id": "breathing_difficulty",
+      "title": "Severe breathing difficulty",
+      "triggers": ["severe breathing difficulty", "difficulty breathing", "shortness of breath", "cannot breathe", "can t breathe", "cant breathe", "unable to breathe", "not breathing"],
+      "steps": [
+        "Stop all activity and alert the crew immediately.",
+        "Check the cabin air and any CO2 alarms. If the air may be the cause, put on your breathing mask and follow the cabin emergency procedure.",
+        "Keep the person sitting upright and calm, and use supplemental oxygen only if trained to do so.",
+        "Call the flight surgeon or ground medical team now. If the person stops breathing, start CPR as trained."
+      ],
+      "escalate": "Immediately. Severe breathing difficulty is always treated as an emergency.",
+      "source": "General emergency medical principles; cabin atmosphere emergency procedures."
+    },
+    {
+      "id": "loss_of_consciousness",
+      "title": "Loss of consciousness",
+      "triggers": ["loss of consciousness", "unconscious", "passed out", "fainted", "collapsed", "not responding"],
+      "steps": [
+        "Make sure the area is safe, then alert the crew and call the medical team immediately.",
+        "Check breathing and pulse. If there is no normal breathing, start CPR as trained.",
+        "Secure the person with restraints to prevent injury, and do not move them unless the area is unsafe.",
+        "Keep the medical team informed of changes and note the time of the event."
+      ],
+      "escalate": "Immediately. Any loss of consciousness is an emergency.",
+      "source": "General emergency medical principles; crew CPR and medical training."
+    },
+    {
+      "id": "severe_bleeding",
+      "title": "Severe bleeding",
+      "triggers": ["severe bleeding", "heavy bleeding", "bleeding heavily", "uncontrolled bleeding", "bleeding that will not stop"],
+      "steps": [
+        "Apply firm, direct pressure to the wound with sterile gauze or cloth.",
+        "If pressure does not control bleeding on a limb, apply a tourniquet if you are trained to do so.",
+        "Keep the injured person still and, if possible, raise the injured limb.",
+        "Alert the crew and call the medical team now, and keep applying pressure until help arrives."
+      ],
+      "escalate": "Immediately. Severe bleeding is always treated as an emergency.",
+      "source": "General first-aid and trauma principles; follow the onboard medical kit procedures."
+    }
+  ]
+}

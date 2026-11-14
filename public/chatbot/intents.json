@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "intents": [
+    {"id":"greeting","phrases":["hello","hi","hey","good morning"],"response":"Hello, I am ORBIT. Ask about a recorded metric or choose a topic: sleep, exercise, radiation, mental wellness, or nutrition."},
+    {"id":"help","phrases":["help","what can you do","options","menu","topics"],"response":"I can answer general questions about cardiovascular health, bone and muscle, radiation, sleep, vision and motion, mental wellness, nutrition and hydration, infection and minor injury, general symptoms, and cabin air. I can also report your latest cached readings. I cannot diagnose or replace your mission medical team."}
+  ]
+}

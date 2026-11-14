@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\CheckinController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\ChatbotOversightController;
 use App\Http\Controllers\CrewOverviewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
@@ -52,6 +54,7 @@ Route::middleware('auth')->group(function () {
     // Medical officer / admin area (built out in later phases)
     Route::middleware(EnsureRole::class.':medical_officer,admin')->group(function () {
         Route::get('/staff', [CrewOverviewController::class, 'index'])->name('staff.home');
+        Route::get('/staff/chatbot', [ChatbotOversightController::class, 'index'])->name('staff.chatbot');
     });
 
     Route::middleware(EnsureRole::class.':admin')->prefix('admin')->name('admin.')->group(function () {
@@ -84,7 +87,13 @@ Route::middleware('auth')->group(function () {
 
     // Astronaut area: every query is scoped to the signed-in user's own crew profile
     Route::middleware(EnsureRole::class.':astronaut')->group(function () {
+        Route::middleware('throttle:60,1')->prefix('chatbot')->name('chatbot.')->group(function () {
+            Route::get('/session', [ChatbotController::class, 'session'])->name('session');
+            Route::get('/snapshot', [ChatbotController::class, 'snapshot'])->name('snapshot');
+            Route::post('/messages/sync', [ChatbotController::class, 'sync'])->name('sync');
+        });
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
+        Route::view('/assistant', 'assistant.show')->name('assistant.show');
         Route::get('/hazards', [HazardDashboardController::class, 'index'])->name('hazards.index');
         
         // Phase C: Hazard Monitoring Pages

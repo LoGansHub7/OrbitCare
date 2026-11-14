@@ -3,6 +3,7 @@
     @if (auth()->user()->isAstronaut())
         <div class="small text-uppercase text-white-50 px-2 mt-2">Overview</div>
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard</a>
+        <a href="{{ route('assistant.show') }}" class="{{ request()->routeIs('assistant.*') ? 'active' : '' }}"><i class="bi bi-stars" aria-hidden="true"></i> ORBIT assistant</a>
         <a href="{{ route('alerts.index') }}" class="{{ request()->routeIs('alerts.*') ? 'active' : '' }}"><i class="bi bi-bell" aria-hidden="true"></i> Alerts</a>
         <div class="small text-uppercase text-white-50 px-2 mt-3">Hazards</div>
         <a href="{{ route('hazards.index') }}" class="{{ request()->routeIs('hazards.*') ? 'active' : '' }}"><i class="bi bi-globe2" aria-hidden="true"></i> Five hazards</a>
@@ -18,7 +19,8 @@
         <a href="{{ route('reports.self') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Reports</a>
         <a href="{{ route('hazard-report.self') }}" class="{{ request()->routeIs('hazard-report.*') ? 'active' : '' }}"><i class="bi bi-file-earmark-bar-graph" aria-hidden="true"></i> Hazard report</a>
     @else
-        <a href="{{ route('staff.home') }}" class="{{ request()->routeIs('staff.*') ? 'active' : '' }}"><i class="bi bi-people" aria-hidden="true"></i> Overview</a>
+        <a href="{{ route('staff.home') }}" class="{{ request()->routeIs('staff.home', 'staff.crew.*') ? 'active' : '' }}"><i class="bi bi-people" aria-hidden="true"></i> Overview</a>
+        <a href="{{ route('staff.chatbot') }}" class="{{ request()->routeIs('staff.chatbot') ? 'active' : '' }}"><i class="bi bi-chat-square-text" aria-hidden="true"></i> Assistant activity</a>
         @if(auth()->user()->isAdmin())<a href="{{ route('admin.index') }}" class="{{ request()->routeIs('admin.index') ? 'active' : '' }}"><i class="bi bi-sliders" aria-hidden="true"></i> Administration</a><a href="{{ route('admin.demo') }}" class="{{ request()->routeIs('admin.demo*') ? 'active' : '' }}"><i class="bi bi-play-circle" aria-hidden="true"></i> Demo mission control</a>@endif
     @endif
     <div class="small text-uppercase text-white-50 px-2 mt-3">Mission</div>
