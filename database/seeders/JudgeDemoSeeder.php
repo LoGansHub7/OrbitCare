@@ -8,7 +8,8 @@ use Illuminate\Database\Seeder;
 
 /**
  * Fictional, presentation-only records for a public judging environment.
- * It leaves only Tendai Moyo and the assigned medical officer active.
+ * It leaves Tendai Moyo, the assigned medical officer, and a restricted
+ * administrator active for the judging walkthrough.
  */
 class JudgeDemoSeeder extends Seeder
 {
@@ -33,9 +34,9 @@ class JudgeDemoSeeder extends Seeder
         $medicalOfficer->assignedCrewProfiles()->sync([$tendai->id]);
 
         // Retain the underlying synthetic scenarios, but prevent the unused
-        // demonstration accounts (including the seeded administrator) signing in.
+        // astronaut demonstration accounts signing in.
         User::query()
-            ->whereIn('email', ['astro1@orbitcare.test', 'astro3@orbitcare.test', 'admin@orbitcare.test'])
+            ->whereIn('email', ['astro1@orbitcare.test', 'astro3@orbitcare.test'])
             ->update(['is_active' => false]);
     }
 }
