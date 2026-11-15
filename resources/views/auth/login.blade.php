@@ -36,19 +36,24 @@
             </form>
         </div>
 
-        @if (app()->environment('local'))
+        @if (app()->environment('local') || config('orbitcare.judge_demo'))
             <div class="oc-card mt-3 small">
-                <div class="fw-semibold mb-2">Demo accounts (fictional · local only)</div>
+                <div class="fw-semibold mb-2">Judge demo accounts (fictional)</div>
                 <table class="table table-sm mb-2">
                     <tbody>
-                    <tr><td>astro1@orbitcare.test</td><td>OC-01 · stable</td></tr>
-                    <tr><td>astro2@orbitcare.test</td><td>OC-02 · sleep ↓ fatigue ↑</td></tr>
-                    <tr><td>astro3@orbitcare.test</td><td>OC-03 · stale data</td></tr>
-                    <tr><td>medic@orbitcare.test</td><td>Medical officer</td></tr>
-                    <tr><td>admin@orbitcare.test</td><td>Administrator</td></tr>
+                    @if (app()->environment('local'))
+                        <tr><td>astro1@orbitcare.test</td><td>OC-01 · stable</td></tr>
+                    @endif
+                    <tr><td>astro2@orbitcare.test</td><td>Tendai Moyo · astronaut · sleep ↓ fatigue ↑</td></tr>
+                    <tr><td>medic@orbitcare.test</td><td>Assigned medical officer</td></tr>
+                    @if (app()->environment('local'))
+                        <tr><td>astro3@orbitcare.test</td><td>OC-03 · stale data</td></tr>
+                        <tr><td>admin@orbitcare.test</td><td>Administrator</td></tr>
+                    @endif
                     </tbody>
                 </table>
                 <div>Password for all: <code>orbitcare-demo</code></div>
+                <div class="text-secondary mt-2">Fictional demonstration data only; remove these credentials after judging.</div>
             </div>
         @endif
     </div></div></div></div>

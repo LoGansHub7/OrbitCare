@@ -47,9 +47,16 @@ QUEUE_CONNECTION=sync
 
 ORBITCARE_DEMO_MODE=false
 ORBITCARE_DEMO_DATABASE=orbitcare
+ORBITCARE_JUDGE_DEMO=false
 ```
 
 Do not use demo credentials in production. Set `ORBITCARE_DEMO_MODE=false`; its reset function must never be enabled on the live site.
+
+For a temporary judging deployment, set `ORBITCARE_JUDGE_DEMO=true` only after running the dedicated judge seed below. This displays the two fictional judge accounts on the login page; it does not enable reset or simulation controls. Change it back to `false` and remove or deactivate the accounts after judging.
+
+```bash
+php artisan db:seed --class=Database\Seeders\JudgeDemoSeeder --force
+```
 
 ## SSH commands
 
