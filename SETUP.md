@@ -31,7 +31,6 @@
    php artisan key:generate
    php artisan migrate --seed
    ```
-
 4. Open `http://localhost/OrbitCare/public`.
 
 ## Tests and demo data
